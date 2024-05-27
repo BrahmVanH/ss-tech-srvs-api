@@ -1,0 +1,37 @@
+service: captains-lakefront-rentals-api
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  httpApi:
+    cors: true
+
+custom:
+  hooks:
+    before:deploy:runBuild:
+      commands: npm run build:lambda
+
+package:
+  patterns:
+    - 'lambda/dist/**'
+    - 'node_modules/**'
+    - '!src/**'
+    - '!.env*'
+    - '!tsconfig.json'
+    - '!codegen.yml'
+    - '!schema.graphql'
+    - '!.gitignore'
+    
+plugins:
+  - serverless-offline
+
+functions:
+  graphql:
+    handler: lambda/dist/server.handler
+    events:
+      - httpApi:
+          path: /
+          method: POST
+      - httpApi:
+          path: /
+          method: GET
