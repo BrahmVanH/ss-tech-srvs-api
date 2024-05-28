@@ -1,35 +1,17 @@
-import { Booking, User, Property } from './models';
-import { signToken } from './utils/auth';
-import { getS3HomePageImgs, getS3HideawayPgImgs, getS3CottagePgImgs, getS3AboutPgImgs } from './utils/s3Query';
+import {  User, Customer, Property, WorkOrder } from './models';
 import { connectToDb } from './connection/db';
-import { IQueryBookingsArgs, ILoginUserArgs, IRemoveUserArgs, ICreateBookingArgs, IRemoveBookingArgs, IUser, IUpdatePropertyArgs } from './types';
-import {
-	CreateUserInput,
-	Resolvers,
-	MutationCreateUserArgs,
-	MutationLoginUserArgs,
-	MutationCreateBookingArgs,
-	MutationRemoveUserArgs,
-	MutationRemoveBookingArgs,
-	MutationUpdatePropertyInfoArgs,
-	Property as IProperty,
-	MutationDeleteS3ObjectsArgs,
-	QueryQueryBookingsByPropertyArgs,
-	RemoveBookingResponse,
-} from './generated/graphql';
-import { getPresignedUrl, deleteS3Objects } from './utils/s3Upload';
-
+import { signToken } from './utils/auth';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
+// TO_DO: create resolvers flow to create, update, delete user pin
 
-
-const resolvers: Resolvers = {
+const resolvers = {
 	Query: {
 		getAllUsers: async () => {
 			try {
 				await connectToDb();
 
-				const allUsers: IUser[] = await User.find();
+				const allUsers = await User.find();
 
 				if (!allUsers) {
 					throw new Error('Error fetching all users from database');
@@ -41,77 +23,132 @@ const resolvers: Resolvers = {
 				throw new Error('Error in finding users: ' + err.message);
 			}
 		},
-		queryBookingsByProperty: async (_: {}, { propertyId }: QueryQueryBookingsByPropertyArgs, __: any) => {
+		queryCustomers: async () => {
+			try {
+				await connectToDb();
+
+				const customers = await Customer.find();
+
+				if (!customers) {
+					throw new Error('Error fetching all customers from database');
+				}
+
+				return customers;
+			} catch (err: any) {
+				console.error({ message: 'error in finding customers', details: err });
+				throw new Error('Error in finding customers: ' + err.message);
+			}
+		},
+		queryCustomerById: async (_: {}, { customerId }: { customerId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!customerId) {
+					throw new Error('No customer ID was presented for querying customer');
+				}
+
+				const customer = await Customer.findOne({ _id: customerId });
+
+				if (!customer) {
+					throw new Error('Cannot find customer in database');
+				}
+
+				return customer;
+			} catch (err: any) {
+				console.error({ message: 'error in finding customer', details: err });
+				throw new Error('Error in finding customer: ' + err.message);
+			}
+		},
+		queryProperties: async () => {
+			try {
+				await connectToDb();
+
+				const properties = await Property.find();
+
+				if (!properties) {
+					throw new Error('Error fetching all properties from database');
+				}
+
+				return properties;
+			} catch (err: any) {
+				console.error({ message: 'error in finding properties', details: err });
+				throw new Error('Error in finding properties: ' + err.message);
+			}
+		},
+		queryPropertyById: async (_: {}, { propertyId }: { propertyId: string }, __: any) => {
 			try {
 				await connectToDb();
 
 				if (!propertyId) {
-					throw new Error('No property name was presented for querying bookings');
-				}
-				const bookings = await Booking.find({ propertyId: propertyId });
-				if (!bookings) {
-					throw new Error('Cannot find booking in database');
-				}
-				return bookings;
-			} catch (err: any) {
-				console.error({ message: 'error in finding bookings', details: err });
-				throw new Error('Error in finding dates: ' + err.message);
-			}
-		},
-		getHomePgImgs: async () => {
-			try {
-				const homePgImgs = await getS3HomePageImgs();
-				if (homePgImgs instanceof Array) {
-					console.error('Error in querying s3 for homepage images', homePgImgs);
-					throw new Error('Error in querying s3 for homepage images');
+					throw new Error('No property ID was presented for querying property');
 				}
 
-				if (!homePgImgs?.headerImgUrl || !homePgImgs?.hideawayImgUrl || !homePgImgs?.cottageImgUrl) {
-					console.error('Error in querying s3 for homepage images');
-					throw new Error('Something went wrong in fetching object from s3');
-				}
-				return homePgImgs;
-			} catch (err: any) {
-				console.error('Error in querying s3 for homepage images', err);
-				throw new Error('Error in querying s3 for homepage images: ' + err.message);
-			}
-		},
-		getHideawayImgs: async () => {
-			try {
-				const hideawayImgs = await getS3HideawayPgImgs();
+				const property = await Property.findOne({ _id: propertyId });
 
-				if (!hideawayImgs) {
-					throw new Error('Something went wrong in fetching hideaway object from S3');
+				if (!property) {
+					throw new Error('Cannot find property in database');
 				}
-				return hideawayImgs;
-			} catch (err: any) {
-				console.error('Error in getHideawayImgs...', err);
-				throw new Error('Error in getting hideaway images from s3: ' + err.message);
-			}
-		},
-		getCottageImgs: async () => {
-			try {
-				const cottageImgs = await getS3CottagePgImgs();
 
-				if (!cottageImgs) {
-					throw new Error('Something went wrong in fetching cottage object from S3');
-				}
-				return cottageImgs;
+				return property;
 			} catch (err: any) {
-				console.error('Error in getCottageImgs...', err);
-				throw new Error('Error in getting cottage images from s3: ' + err.message);
+				console.error({ message: 'error in finding property', details: err });
+				throw new Error('Error in finding property: ' + err.message);
 			}
 		},
-		getAboutPgImg: async () => {
+		queryWorkOrders: async () => {
 			try {
-				const aboutPgImgs = await getS3AboutPgImgs();
-				if (!aboutPgImgs) {
-					throw new Error('Something went wrong in fetching object from s3');
+				await connectToDb();
+
+				const workOrders = await WorkOrder.find();
+
+				if (!workOrders) {
+					throw new Error('Error fetching all work orders from database');
 				}
-				return aboutPgImgs;
+
+				return workOrders;
 			} catch (err: any) {
-				console.error('Error in querying s3 for about page image', err);
-				throw new Error('Error in querying s3 for about page image: ' + err.message);
+				console.error({ message: 'error in finding work orders', details: err });
+				throw new Error('Error in finding work orders: ' + err.message);
+			}
+		},
+		queryWorkOrderByProperty: async (_: {}, { propertyId }: { propertyId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!propertyId) {
+					throw new Error('No property name was presented for querying work orders');
+				}
+
+				const workOrders = await WorkOrder.find({ propertyId });
+
+				if (!workOrders) {
+					throw new Error('Cannot find work orders in database');
+				}
+
+				return workOrders;
+			} catch (err: any) {
+				console.error({ message: 'error in finding work orders', details: err });
+				throw new Error('Error in finding work orders: ' + err.message);
+			}
+		},
+		queryWorkOrderByCustomer: async (_: {}, { customerId }: { customerId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!customerId) {
+					throw new Error('No customer name was presented for querying work orders');
+				}
+
+				const workOrders = await WorkOrder.find({ customerId });
+
+				if (!workOrders) {
+					throw new Error('Cannot find work orders in database');
+				}
+
+				return workOrders;
+			} catch (err: any) {
+				console.error({ message: 'error in finding work orders', details: err });
+				throw new Error('Error in finding work orders: ' + err.message);
 			}
 		},
 		getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
@@ -126,45 +163,9 @@ const resolvers: Resolvers = {
 				throw new Error('Error in getting upload url for s3: ' + err.message);
 			}
 		},
-		getPropertyInfo: async (_: {}, { _id }: { _id: string }, __: any) => {
-			try {
-				await connectToDb();
 
-				if (!_id) {
-					throw new Error('No ID was presented for querying property info');
-				}
-
-				const propertyInfo: IProperty | null = await Property.findOne({ _id }).populate('bookings');
-
-				if (!propertyInfo) {
-					throw new Error('Could not find property with that name');
-				}
-
-				return propertyInfo;
-			} catch (err: any) {
-				console.error('Error in getting property info', err);
-				throw new Error('Error in getting property info: ' + err.message);
-			}
-		},
-		getProperties: async () => {
-			try {
-				await connectToDb();
-
-				const properties: IProperty[] = await Property.find().populate('bookings');
-
-				if (!properties) {
-					throw new Error('Error fetching all properties from database');
-				}
-
-				return properties;
-			} catch (err: any) {
-				console.error({ message: 'error in finding properties', details: err });
-				throw new Error('Error in finding properties: ' + err.message);
-			}
-		},
-	},
 	Mutation: {
-		createUser: async (_: {}, args: MutationCreateUserArgs, __: any) => {
+		createUser: async (_: {}, args: any, __: any) => {
 			const { firstName, lastName, username, userPassword, adminCode } = args.input;
 
 			if (!firstName || !lastName || !username || !userPassword || !adminCode) {
@@ -176,7 +177,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const user: IUser = await User.create({
+				const user = await User.create({
 					firstName,
 					lastName,
 					username,
@@ -194,15 +195,15 @@ const resolvers: Resolvers = {
 				throw new Error('Error in creating user: ' + err.message);
 			}
 		},
-		loginUser: async (_: {}, args: MutationLoginUserArgs, __: any) => {
+		loginUser: async (_: {}, args: any, __: any) => {
 			try {
-				const { username, userPassword } = args.input as ILoginUserArgs;
+				const { username, userPassword } = args.input;
 				await connectToDb();
 				if (!username || !userPassword) {
 					throw new Error('username and password fields must be filled to log in');
 				}
 
-				const user: IUser | null = await User.findOne({ username });
+				const user = await User.findOne({ username });
 				if (!user?.comparePassword) {
 					throw new Error("Can't find user with that username");
 				}
@@ -219,15 +220,15 @@ const resolvers: Resolvers = {
 				throw new Error('Error in logging in user: ' + err.message);
 			}
 		},
-		removeUser: async (_: {}, args: MutationRemoveUserArgs, __: any) => {
+		deleteUser: async (_: {}, args: any, __: any) => {
 			try {
-				const { username, userPassword } = args.input as IRemoveUserArgs;
+				const { username, userPassword } = args.input;
 				await connectToDb();
 				if (!username) {
 					throw new Error('username  fields must be filled to remove');
 				}
 
-				const user: IUser | null = await User.findOne({ username });
+				const user = await User.findOne({ username });
 
 				if (!user?.comparePassword) {
 					throw new Error("Can't find user with that username");
@@ -246,70 +247,98 @@ const resolvers: Resolvers = {
 				throw new Error('Error in removing in user: ' + err.message);
 			}
 		},
-		createBooking: async (_: {}, args: MutationCreateBookingArgs, __: any) => {
-			try {
-				const { bookings } = args.input;
-
-				await connectToDb();
-				if (!bookings || bookings.length === 0) {
-					throw new Error('No bookings provided to create');
-				}
-				const createdBookings = await Booking.create(bookings);
-
-				if (!createdBookings) {
-					throw new Error('Could not create new date');
-				}
-				return createdBookings;
-			} catch (err: any) {
-				throw new Error('Error in creating booking in db: ' + err.message);
-			}
-		},
-		removeBooking: async (_: {}, args: MutationRemoveBookingArgs, __: any) => {
-			try {
-				const { bookingIds } = args.input;
-				await connectToDb();
-				if (!bookingIds || bookingIds.length === 0) {
-					throw new Error('booking ID is undefined');
-				}
-				const booking = await Booking.deleteMany({ _id: { $in: bookingIds } });
-				if (!booking) {
-					throw new Error('could not find unavailable date with that value...');
-				}
-
-				return booking;
-			} catch (err: any) {
-				throw new Error('Error in removing unavailable booking from db: ' + err.message);
-			}
-		},
-		updatePropertyInfo: async (_: {}, args: MutationUpdatePropertyInfoArgs, __: any) => {
-			if (!args.input) {
-				throw new Error('No input object was presented for updating property info');
+		createCustomer: async (_: {}, args: any, __: any) => {
+			const { customer } = args.input;
+			if (!customer) {
+				throw new Error('No customer object was presented for creating customer');
 			}
 
-			const { _id, update } = args.input;
-
-			if (!_id) {
-				throw new Error('Property name is undefined');
-			}
-
-			if (!update?.propertyDescription || !update?.amenities || !update?.headerImgKey) {
-				throw new Error('Update object is undefined');
-			}
 			try {
 				await connectToDb();
 
-				const property = await Property.findOneAndUpdate({ _id }, { $set: update });
+				const newCustomer = await Customer.create(customer);
 
-				if (!property) {
-					throw new Error('Could not find property with that name');
+				if (!newCustomer) {
+					throw new Error('Could not create customer');
 				}
 
-				return property;
+				return newCustomer;
 			} catch (err: any) {
-				throw new Error('Error in updating property info: ' + err.message);
+				throw new Error('Error in creating customer: ' + err.message);
 			}
 		},
-		deleteS3Objects: async (_: {}, args: MutationDeleteS3ObjectsArgs, __: any) => {
+		updateCustomer: async (_: {}, args: any, __: any) => {
+			const { customerId, customer } = args.input;
+			if (!customerId || !customer) {
+				throw new Error('No customer object was presented for updating customer');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, customer, { new: true });
+
+				if (!updatedCustomer) {
+					throw new Error('Could not update customer');
+				}
+
+				return updatedCustomer;
+			} catch (err: any) {
+				throw new Error('Error in updating customer: ' + err.message);
+			}
+		},
+		deleteCustomer: async (_: {}, args: any, __: any) => {
+			const { customerId } = args.input;
+			if (!customerId) {
+				throw new Error('No customer ID was presented for deleting customer');
+			}
+
+			try {
+				await connectToDb();
+
+				const deletedCustomer = await Customer.findOneAndDelete({ _id: customerId });
+
+				if (!deletedCustomer) {
+					throw new Error('Could not delete customer');
+				}
+
+				return deletedCustomer;
+			} catch (err: any) {
+				throw new Error('Error in deleting customer: ' + err.message);
+			}
+		},
+		createProperty: async (_: {}, args: any, __: any) => {
+			const { property } = args.input;
+			if (!property) {
+				throw new Error('No property object was presented for creating property');
+			}
+
+			try {
+				await connectToDb();
+
+				const newProperty = await Property.create(property);
+
+				if (!newProperty) {
+					throw new Error('Could not create property');
+				}
+
+				return newProperty;
+			} catch (err: any) {
+				throw new Error('Error in creating property: ' + err.message);
+			}
+		},
+		updateProperty: async (_: {}, args: any, __: any) => {
+			const { propertyId, property } = args.input;
+			if (!propertyId || !property) {
+				throw new Error('No property object was presented for updating property');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedProperty = await Property.findOneAndUpdate({ _id: propertyId }, property
+	
+		deleteS3Objects: async (_: {}, args: any, __: any) => {
 			const { imgKeys } = args?.input;
 			if (!imgKeys || imgKeys.length === 0) {
 				throw new Error('No key was presented for deleting object');

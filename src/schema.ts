@@ -1,20 +1,5 @@
 const typeDefs = `#graphql
 
-	# User Types
-
- type User {
-	_id: ID
-	firstName: String!
-	lastName: String!
-	username: String!
-	password: String
-	pin: String!
-}
-
-type Auth {
-	token: ID!
-	user: User!
-}
 
 # AWS S3 Types
 
@@ -37,12 +22,51 @@ input DeleteS3ObjectInput {
 
 # User & CRUD Types
 
+ type User {
+	_id: ID
+	firstName: String!
+	lastName: String!
+	username: String!
+	password: String
+	pin: String!
+}
+
+type Auth {
+	token: ID!
+	user: User!
+}
+
 input CreateUserInput {
 	firstName: String!
 	lastName: String!
 	username: String!
 	userPassword: String!
 	adminCode: String!
+}
+
+input UpdateUserFirstNameInput {
+	userId: ID!
+	firstName: String!
+}
+
+input UpdateUserLastNameInput {
+	userId: ID!
+	lastName: String!
+}
+
+input UpdateUserUsernameInput {
+	userId: ID!
+	username: String!
+}
+
+input UpdateUserPasswordInput {
+	userId: ID!
+	userPassword: String!
+}
+
+input UpdateUserPinInput {
+	userId: ID!
+	pin: String!
 }
 
 input LoginUserInput {
@@ -60,15 +84,16 @@ input RemoveUserInput {
 
 type Customer {
 	_id: ID!
-	agentFirstName: String!
-	agentLastName: String!
+	createdAt: String!
+	firstName: String!
+	lastName: String!
 	businessName: String!
 	workOrders: [WorkOrder]
 }
 
 input NewCustomerInput {
-	agentFirstName: String!
-	agentLastName: String!
+	firstName: String!
+	lastName: String!
 	businessName: String!
 }
 
@@ -77,10 +102,19 @@ input createCustomerInput {
 }
 
 
-input UpdateCustomerInput {
-	agentFirstName: String
-	agentLastName: String
-	businessName: String
+input UpdateCustomerFirstNameInput {
+	customerId: ID!
+	agentFirstName: String!
+}
+
+input UpdateCustomerLastNameInput {
+	customerId: ID!
+	agentLastName: String!
+}
+
+input UpdateCustomerBusinessNameInput {
+	customerId: ID!
+	businessName: String!
 }
 
 input RemoveCustomerInput {
@@ -88,7 +122,7 @@ input RemoveCustomerInput {
 }
 
 
-# Property & CRUD Types
+# Address & CRUD Type
 
 type Address {
 	street: String!
@@ -100,6 +134,29 @@ type Address {
 
 }
 
+input CreateAddressInput {
+	street: String!
+	unit: String!
+	city: String!
+	state: String!
+	zip: String!
+	country: String!
+}
+
+input UpdateAddressInput {
+	street: String!
+	unit: String!
+	city: String!
+	state: String!
+	zip: String!
+	country: String!
+}
+
+input RemoveAddressInput {
+	addressId: ID!
+}
+
+# Property & CRUD Types
 
 type Property {
 	_id: ID!
@@ -121,14 +178,30 @@ input createPropertyInput {
 	property: NewPropertyInput!
 }
 
-input UpdatePropertyInput {
-	propertyName: String
-	propertyDescription: String
-	propertyAddress: Address
-	agent: ID
-	s3FolderKey: String
+input updatePropertyNameInput {
+	propertyId: ID!
+	propertyName: String!
 }
 
+input updatePropertyDescriptionInput {
+	propertyId: ID!
+	propertyDescription: String!
+}
+
+input updatePropertyAddressInput {
+	propertyId: ID!
+	propertyAddress: Address!
+}
+
+input updatePropertyAgentInput {
+	propertyId: ID!
+	agent: ID!
+}
+
+input updatePropertyS3FolderKeyInput {
+	propertyId: ID!
+	s3FolderKey: String!
+}
 
 input RemovePropertyInput {
 	propertyId: ID!
@@ -187,6 +260,62 @@ input UpdateWorkOrderInput {
 	comments: String
 }
 
+input updateWorkOrderDateInput {
+	workOrderId: ID!
+	date: String!
+}
+
+input updateWorkOrderCustomerIdInput {
+	workOrderId: ID!
+	customerId: ID!
+}
+
+input updateWorkOrderPropertyIdInput {
+	workOrderId: ID!
+	propertyId: ID!
+}
+
+input updateWorkOrderTypeInput {
+	workOrderId: ID!
+	type: String!
+}
+
+input updateWorkOrderDescriptionInput {
+	workOrderId: ID!
+	description: String!
+}
+
+input updateWorkOrderCompletedByInput {
+	workOrderId: ID!
+	completedBy: String!
+}
+
+input updateWorkOrderQuoteInput {
+	workOrderId: ID!
+	quote: Float!
+}
+
+input updateWorkOrderTotalInput {
+	workOrderId: ID!
+	total: Float!
+}
+
+input updateWorkOrderChargedInput {
+	workOrderId: ID!
+	charged: Boolean!
+}
+
+input updateWorkOrderPaidInput {
+	workOrderId: ID!
+	paid: Boolean!
+}
+
+input updateWorkOrderCommentsInput {
+	workOrderId: ID!
+	comments: String!
+}
+
+
 
 input RemoveWorkOrderInput {
 	workOrderIds: [ID!]!
@@ -194,35 +323,88 @@ input RemoveWorkOrderInput {
 
 
 
-
+# Queries
 
 type Query {
+
+	# User Queries
 	getAllUsers: [User!]
+
+	# Customer Queries
 	queryCustomers: [Customer!]
 	queryCustomerById(customerId: ID!): Customer!
+
+	# Address Queries
+	queryAddresses: [Address!]
+
+	# Property Queries
 	queryProperties: [Property!]
 	queryPropertyById(propertyId: ID!): Property!
+
+	# WorkOrder Queries
 	queryWorkOrders: [WorkOrder!]
 	queryWorkOrderById(workOrderId: ID!): WorkOrder!
 	queryWorkOrdersByCustomer(customerId: ID!): [WorkOrder!]
 	queryWorkOrdersByProperty(propertyId: ID!): [WorkOrder!]
-	queryBookingsByProperty(propertyId: ID!): [Booking!]
+
+	# S3 Queries
 	getPresignedS3Url(imgKey: String!, commandType: String!, altTag: String!): String!
 
 }
+
+# Mutations
+
+
 type Mutation {
+	# User Mutations
 	createUser(input: CreateUserInput!): Auth!
+	updateUserFirstName(input: UpdateUserFirstNameInput!): Auth!
+	updateUserLastName(input: UpdateUserLastNameInput!): Auth!
+	updateUserUsername(input: UpdateUserUsernameInput!): Auth!
+	updateUserPassword(input: UpdateUserPasswordInput!): Auth!
+	updateUserPin(input: UpdateUserPinInput!): Auth!
 	loginUser(input: LoginUserInput!): Auth!
 	removeUser(input: RemoveUserInput!): Auth!
+
+	# Customer Mutations
 	createCustomer(input: createCustomerInput!): Customer!
-	updateCustomer(input: UpdateCustomerInput!): Customer!
+	updateCustomerFirstName(input: UpdateCustomerFirstNameInput!): Customer!
+	updateCustomerLastName(input: UpdateCustomerLastNameInput!): Customer!
+	updateCustomerBusinessName(input: UpdateCustomerBusinessNameInput!): Customer!
 	deleteCustomer(input: RemoveCustomerInput!): Customer!
+
+	# Address Mutations
+
+	createAddress(input: CreateAddressInput!): Address!
+	updateAddress(input: UpdateAddressInput!): Address!
+	deleteAddress(input: RemoveAddressInput!): Address!
+
+	# Property Mutations
 	createProperty(input: createPropertyInput!): Property!
-	updateProperty(input: UpdatePropertyInput!): Property!
+	updatePropertyName(input: updatePropertyNameInput!): Property!
+	updatePropertyDescription(input: updatePropertyDescriptionInput!): Property!
+	updatePropertyAddress(input: updatePropertyAddressInput!): Property!
+	updatePropertyAgent(input: updatePropertyAgentInput!): Property!
+	updatePropertyS3FolderKey(input: updatePropertyS3FolderKeyInput!): Property!
 	deleteProperty(input: RemovePropertyInput!): Property!
+
+	# WorkOrder Mutations
 	createWorkOrder(input: createWorkOrderInput!): WorkOrder!
-	updateWorkOrder(input: UpdateWorkOrderInput!): WorkOrder!
+	updateWorkOrderDate(input: updateWorkOrderDateInput!): WorkOrder!
+	updateWorkOrderCustomerId(input: updateWorkOrderCustomerIdInput!): WorkOrder!
+	updateWorkOrderPropertyId(input: updateWorkOrderPropertyIdInput!): WorkOrder!
+	updateWorkOrderType(input: updateWorkOrderTypeInput!): WorkOrder!
+	updateWorkOrderDescription(input: updateWorkOrderDescriptionInput!): WorkOrder!
+	updateWorkOrderCompletedBy(input: updateWorkOrderCompletedByInput!): WorkOrder!
+	updateWorkOrderQuote(input: updateWorkOrderQuoteInput!): WorkOrder!
+	updateWorkOrderTotal(input: updateWorkOrderTotalInput!): WorkOrder!
+	updateWorkOrderCharged(input: updateWorkOrderChargedInput!): WorkOrder!
+	updateWorkOrderPaid(input: updateWorkOrderPaidInput!): WorkOrder!
+	updateWorkOrderComments(input: updateWorkOrderCommentsInput!): WorkOrder!
 	deleteWorkOrder(input: RemoveWorkOrderInput!): RemoveWorkOrderResponse!
+
+	# S3 Mutations
+
 	deleteS3Objects(input: DeleteS3ObjectInput!): DeleteS3ObjectResponse!
 }
 
