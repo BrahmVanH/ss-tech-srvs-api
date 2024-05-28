@@ -1,7 +1,6 @@
-import { DeleteObjectCommandOutput } from '@aws-sdk/client-s3';
-
 const typeDefs = `#graphql
 
+	# User Types
 
  type User {
 	_id: ID
@@ -9,26 +8,7 @@ const typeDefs = `#graphql
 	lastName: String!
 	username: String!
 	password: String
-}
-
-type Booking {
-	_id: ID!
-	propertyId: ID!
-	dateValue: String!
-}
-
-type Amenity {
-	amenityName: String!
-	amenityType: String!
-}
-
-type Property {
-	_id: ID!
-	propertyName: String!
-	propertyDescription: String!
-	amenities: [Amenity!]!
-	headerImgKey: String!
-	bookings: [Booking!]
+	pin: String!
 }
 
 type Auth {
@@ -36,7 +16,7 @@ type Auth {
 	user: User!
 }
 
-
+# AWS S3 Types
 
 type imageObject {
 	imgKey: String!
@@ -46,28 +26,16 @@ type imageObject {
 	thumbnailAlt: String!
 }
 
-
-
 type DeleteS3ObjectResponse {
 	status: Int!
 	message: String!
 }
 
-type homePgImgPack {
-	headerImgUrl: String!
-	hideawayImgUrl: String!
-	cottageImgUrl: String!
+input DeleteS3ObjectInput {
+	imgKeys: [String!]!
 }
 
-type hideawayImgPack {
-	headerUrl: String!
-	galleryArray: [imageObject!]!
-}
-
-type cottageImgPack {
-	headerUrl: String!
-	galleryArray: [imageObject!]!
-}
+# User & CRUD Types
 
 input CreateUserInput {
 	firstName: String!
@@ -87,66 +55,160 @@ input RemoveUserInput {
 	userPassword: String!
 }
 
-input NewBookingInput {
-	propertyId: ID!
-	dateValue: String!
+# Customer & CRUD Types
+
+
+type Customer {
+	_id: ID!
+	agentFirstName: String!
+	agentLastName: String!
+	businessName: String!
+	workOrders: [WorkOrder]
 }
 
-input CreateBookingInput {
-	bookings: [NewBookingInput!]
+input NewCustomerInput {
+	agentFirstName: String!
+	agentLastName: String!
+	businessName: String!
+}
+
+input createCustomerInput {
+	customer: NewCustomerInput!
 }
 
 
-
-input RemoveBookingInput {
-	bookingIds: [ID!]!
+input UpdateCustomerInput {
+	agentFirstName: String
+	agentLastName: String
+	businessName: String
 }
 
-type RemoveBookingResponse {
-	deletedCount: Int!
+input RemoveCustomerInput {
+	customerId: ID!
 }
 
-input AmenityInput {
-	amenityName: String!
-	amenityType: String!
-}
 
-input Update {
+# Property & CRUD Types
+
+
+type Property {
+	_id: ID!
 	propertyName: String!
 	propertyDescription: String!
-	amenities: [AmenityInput!]
-	headerImgKey: String!
-}
-input UpdatePropertyInput {
-	_id: ID!
-	update: Update!
+	agent: Customer!
+	s3FolderKey: String! 
 }
 
-input DeleteS3ObjectInput {
-	imgKeys: [String!]!
+input NewPropertyInput {
+	propertyName: String!
+	propertyDescription: String!
+	agent: ID!
 }
+
+input createPropertyInput {
+	property: NewPropertyInput!
+}
+
+input UpdatePropertyInput {
+	propertyName: String
+	propertyDescription: String
+	agent: ID
+}
+
+
+input RemovePropertyInput {
+	propertyId: ID!
+}
+
+
+# Workorder & CRUD Types
+
+
+type WorkOrder {
+	_id: ID!
+	date: String!
+	customerId: ID!
+	propertyId: ID! 
+	type: String!
+	description: String!
+	completedBy: String!
+	quote: Float
+	total: Float
+	charged: Boolean!
+	paid: Boolean!
+	comments: String
+	}
+
+
+input NewWorkOrderInput {
+	date: String!
+	customerId: ID!
+	propertyId: ID!
+	type: String!
+	description: String!
+	completedBy: String!
+	quote: Float
+	total: Float
+	charged: Boolean!
+	paid: Boolean!
+	comments: String
+
+}
+
+input createWorkOrderInput {
+	workOrder: NewWorkOrderInput!
+}
+
+input UpdateWorkOrderInput {
+	date: String
+	customerId: ID 
+	propertyId: ID 
+	type: String 
+	description: String 
+	completedBy: String 
+	quote: Float
+	total: Float
+	charged: Boolean 
+	paid: Boolean 
+	comments: String
+}
+
+
+input RemoveWorkOrderInput {
+	workOrderIds: [ID!]!
+}
+
+
 
 
 
 type Query {
 	getAllUsers: [User!]
+	queryCustomers: [Customer!]
+	queryCustomerById(customerId: ID!): Customer!
+	queryProperties: [Property!]
+	queryPropertyById(propertyId: ID!): Property!
+	queryWorkOrders: [WorkOrder!]
+	queryWorkOrderById(workOrderId: ID!): WorkOrder!
+	queryWorkOrdersByCustomer(customerId: ID!): [WorkOrder!]
+	queryWorkOrdersByProperty(propertyId: ID!): [WorkOrder!]
 	queryBookingsByProperty(propertyId: ID!): [Booking!]
-	getHomePgImgs: homePgImgPack!
-	getHideawayImgs: hideawayImgPack!
-	getCottageImgs: cottageImgPack!
-	getAboutPgImg: String!
 	getPresignedS3Url(imgKey: String!, commandType: String!, altTag: String!): String!
-	getPropertyInfo(_id: ID!): Property!
-	getProperties: [Property!]!
 
 }
 type Mutation {
 	createUser(input: CreateUserInput!): Auth!
 	loginUser(input: LoginUserInput!): Auth!
 	removeUser(input: RemoveUserInput!): Auth!
-	createBooking(input: CreateBookingInput!): [Booking]!
-	removeBooking(input: RemoveBookingInput!): RemoveBookingResponse!
-	updatePropertyInfo(input: UpdatePropertyInput!): Property!
+	createCustomer(input: createCustomerInput!): Customer!
+	updateCustomer(input: UpdateCustomerInput!): Customer!
+	deleteCustomer(input: RemoveCustomerInput!): Customer!
+	createProperty(input: createPropertyInput!): Property!
+	updateProperty(input: UpdatePropertyInput!): Property!
+	deleteProperty(input: RemovePropertyInput!): Property!
+	createWorkOrder(input: createWorkOrderInput!): WorkOrder!
+	updateWorkOrder(input: UpdateWorkOrderInput!): WorkOrder!
+	deleteWorkOrder(input: RemoveWorkOrderInput!): RemoveWorkOrderResponse!
 	deleteS3Objects(input: DeleteS3ObjectInput!): DeleteS3ObjectResponse!
 }
 

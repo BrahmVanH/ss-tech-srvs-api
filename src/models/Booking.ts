@@ -2,10 +2,7 @@ import { model, Schema } from 'mongoose';
 import { Booking as IBooking } from '../generated/graphql';
 
 const bookingSchema: Schema = new Schema<IBooking>({
-	propertyId: {
-		type: String,
-		required: true,
-	},
+	propertyId: {},
 	dateValue: {
 		type: String,
 		required: true,
