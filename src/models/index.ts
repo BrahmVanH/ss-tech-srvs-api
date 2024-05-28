@@ -1,5 +1,7 @@
-import Booking from './Booking';
-import User from './User';
-import Property from './Property';
+import User from "./User";
+import Property from "./Property";
+import Customer from "./Customer";
+import WorkOrder from "./WorkOrder";
 
-export { Booking, User, Property };
+export { User, Property, Customer, WorkOrder };
+

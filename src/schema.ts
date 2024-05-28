@@ -90,10 +90,21 @@ input RemoveCustomerInput {
 
 # Property & CRUD Types
 
+type Address {
+	street: String!
+	unit: String!
+	city: String!
+	state: String!
+	zip: String!
+	country: String!
+
+}
+
 
 type Property {
 	_id: ID!
 	propertyName: String!
+	propertyAddress: Address!
 	propertyDescription: String!
 	agent: Customer!
 	s3FolderKey: String! 
@@ -101,6 +112,7 @@ type Property {
 
 input NewPropertyInput {
 	propertyName: String!
+	propertyAddress: Address!
 	propertyDescription: String!
 	agent: ID!
 }
@@ -112,7 +124,9 @@ input createPropertyInput {
 input UpdatePropertyInput {
 	propertyName: String
 	propertyDescription: String
+	propertyAddress: Address
 	agent: ID
+	s3FolderKey: String
 }
 
 

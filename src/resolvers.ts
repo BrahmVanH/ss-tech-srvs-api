@@ -19,6 +19,10 @@ import {
 } from './generated/graphql';
 import { getPresignedUrl, deleteS3Objects } from './utils/s3Upload';
 
+
+// TO_DO: create resolver to create s3 folder for property as soon as property is created
+
+
 const resolvers: Resolvers = {
 	Query: {
 		getAllUsers: async () => {

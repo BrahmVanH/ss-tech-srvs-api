@@ -1,36 +1,48 @@
 import { model, Schema, Types } from 'mongoose';
-import { Amenity, Property } from '../generated/graphql';
 
-const amenitiesSchema: Schema<Amenity> = new Schema<Amenity>({
-	amenityName: {
+const AddressSchema: Schema = new Schema({
+	street: {
+		type: String,
+		required: true,
+	},
+	unit: {
 		type: String,
 	},
-	amenityType: {
+	city: {
 		type: String,
+		required: true,
+	},
+	state: {
+		type: String,
+		required: true,
+	},
+	zip: {
+		type: String,
+		required: true,
 	},
 });
 
-const propertySchema: Schema<Property> = new Schema<Property>({
+const propertySchema: Schema = new Schema({
 	propertyName: {
 		type: String,
+		required: true,
+	},
+	propertyAddress: {
+		type: AddressSchema,
+		required: true,
+
 	},
 	propertyDescription: {
 		type: String,
+		required: true,
 	},
-	amenities: {
-		type: [amenitiesSchema],
+	agent: {
+		type: Types.ObjectId,
+		required: true,
+		ref: 'Customer',
 	},
-	headerImgKey: {
-		type: String,
-	},
-	bookings: [
-		{
-			type: Types.ObjectId,
-			ref: 'Booking',
-		},
-	],
 });
 
-const Property = model<Property>('Property', propertySchema);
+const Property = model('Property', propertySchema);
 
 export default Property;
