@@ -42,12 +42,24 @@ export type Auth = {
   user: User;
 };
 
+export type CreateCustomerInput = {
+  customer: NewCustomerInput;
+};
+
+export type CreatePropertyInput = {
+  property: NewPropertyInput;
+};
+
 export type CreateUserInput = {
   adminCode: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   userPassword: Scalars['String']['input'];
   username: Scalars['String']['input'];
+};
+
+export type CreateWorkOrderInput = {
+  workOrder: NewWorkOrderInput;
 };
 
 export type Customer = {
@@ -424,6 +436,31 @@ export type UpdateCustomerPhoneInput = {
   phone: Scalars['Int']['input'];
 };
 
+export type UpdatePropertyAddressInput = {
+  propertyAddress: AddressInput;
+  propertyId: Scalars['ID']['input'];
+};
+
+export type UpdatePropertyAgentInput = {
+  agent: Scalars['ID']['input'];
+  propertyId: Scalars['ID']['input'];
+};
+
+export type UpdatePropertyDescriptionInput = {
+  propertyDescription: Scalars['String']['input'];
+  propertyId: Scalars['ID']['input'];
+};
+
+export type UpdatePropertyNameInput = {
+  propertyId: Scalars['ID']['input'];
+  propertyName: Scalars['String']['input'];
+};
+
+export type UpdatePropertyS3FolderKeyInput = {
+  propertyId: Scalars['ID']['input'];
+  s3FolderKey: Scalars['String']['input'];
+};
+
 export type UpdateUserFirstNameInput = {
   firstName: Scalars['String']['input'];
   userId: Scalars['ID']['input'];
@@ -449,92 +486,6 @@ export type UpdateUserPinInput = {
 export type UpdateUserUsernameInput = {
   userId: Scalars['ID']['input'];
   username: Scalars['String']['input'];
-};
-
-export type UpdateWorkOrderInput = {
-  charged?: InputMaybe<Scalars['Boolean']['input']>;
-  comments?: InputMaybe<Scalars['String']['input']>;
-  completedBy?: InputMaybe<Scalars['String']['input']>;
-  customerId?: InputMaybe<Scalars['ID']['input']>;
-  date?: InputMaybe<Scalars['String']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  paid?: InputMaybe<Scalars['Boolean']['input']>;
-  propertyId?: InputMaybe<Scalars['ID']['input']>;
-  quote?: InputMaybe<Scalars['Float']['input']>;
-  total?: InputMaybe<Scalars['Float']['input']>;
-  type?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type User = {
-  __typename?: 'User';
-  _id?: Maybe<Scalars['ID']['output']>;
-  firstName: Scalars['String']['output'];
-  lastName: Scalars['String']['output'];
-  password?: Maybe<Scalars['String']['output']>;
-  pin: Scalars['String']['output'];
-  username: Scalars['String']['output'];
-};
-
-export type WorkOrder = {
-  __typename?: 'WorkOrder';
-  _id: Scalars['ID']['output'];
-  charged: Scalars['Boolean']['output'];
-  comments?: Maybe<Scalars['String']['output']>;
-  completedBy: Scalars['String']['output'];
-  customerId: Customer;
-  date: Scalars['String']['output'];
-  description: Scalars['String']['output'];
-  paid: Scalars['Boolean']['output'];
-  propertyId: Property;
-  quote?: Maybe<Scalars['Float']['output']>;
-  total?: Maybe<Scalars['Float']['output']>;
-  type: Scalars['String']['output'];
-};
-
-export type CreateCustomerInput = {
-  customer: NewCustomerInput;
-};
-
-export type CreatePropertyInput = {
-  property: NewPropertyInput;
-};
-
-export type CreateWorkOrderInput = {
-  workOrder: NewWorkOrderInput;
-};
-
-export type ImageObject = {
-  __typename?: 'imageObject';
-  imgKey: Scalars['String']['output'];
-  original: Scalars['String']['output'];
-  originalAlt: Scalars['String']['output'];
-  thumbnail: Scalars['String']['output'];
-  thumbnailAlt: Scalars['String']['output'];
-};
-
-export type UpdatePropertyAddressInput = {
-  propertyAddress: AddressInput;
-  propertyId: Scalars['ID']['input'];
-};
-
-export type UpdatePropertyAgentInput = {
-  agent: Scalars['ID']['input'];
-  propertyId: Scalars['ID']['input'];
-};
-
-export type UpdatePropertyDescriptionInput = {
-  propertyDescription: Scalars['String']['input'];
-  propertyId: Scalars['ID']['input'];
-};
-
-export type UpdatePropertyNameInput = {
-  propertyId: Scalars['ID']['input'];
-  propertyName: Scalars['String']['input'];
-};
-
-export type UpdatePropertyS3FolderKeyInput = {
-  propertyId: Scalars['ID']['input'];
-  s3FolderKey: Scalars['String']['input'];
 };
 
 export type UpdateWorkOrderChargedInput = {
@@ -590,6 +541,42 @@ export type UpdateWorkOrderTotalInput = {
 export type UpdateWorkOrderTypeInput = {
   type: Scalars['String']['input'];
   workOrderId: Scalars['ID']['input'];
+};
+
+export type User = {
+  __typename?: 'User';
+  _id?: Maybe<Scalars['ID']['output']>;
+  firstName: Scalars['String']['output'];
+  lastName: Scalars['String']['output'];
+  password?: Maybe<Scalars['String']['output']>;
+  pin: Scalars['String']['output'];
+  username: Scalars['String']['output'];
+};
+
+export type WorkOrder = {
+  __typename?: 'WorkOrder';
+  _id: Scalars['ID']['output'];
+  charged: Scalars['Boolean']['output'];
+  comments?: Maybe<Scalars['String']['output']>;
+  completedBy: Scalars['String']['output'];
+  customerId?: Maybe<Customer>;
+  date: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  lastUpdated: Scalars['String']['output'];
+  paid: Scalars['Boolean']['output'];
+  propertyId?: Maybe<Property>;
+  quote?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+  type: Scalars['String']['output'];
+};
+
+export type ImageObject = {
+  __typename?: 'imageObject';
+  imgKey: Scalars['String']['output'];
+  original: Scalars['String']['output'];
+  originalAlt: Scalars['String']['output'];
+  thumbnail: Scalars['String']['output'];
+  thumbnailAlt: Scalars['String']['output'];
 };
 
 
@@ -667,7 +654,10 @@ export type ResolversTypes = {
   AddressInput: AddressInput;
   Auth: ResolverTypeWrapper<Auth>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CreateCustomerInput: CreateCustomerInput;
+  CreatePropertyInput: CreatePropertyInput;
   CreateUserInput: CreateUserInput;
+  CreateWorkOrderInput: CreateWorkOrderInput;
   Customer: ResolverTypeWrapper<Customer>;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: ResolverTypeWrapper<DeleteS3ObjectResponse>;
@@ -691,34 +681,30 @@ export type ResolversTypes = {
   UpdateCustomerFirstNameInput: UpdateCustomerFirstNameInput;
   UpdateCustomerLastNameInput: UpdateCustomerLastNameInput;
   UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
+  UpdatePropertyAddressInput: UpdatePropertyAddressInput;
+  UpdatePropertyAgentInput: UpdatePropertyAgentInput;
+  UpdatePropertyDescriptionInput: UpdatePropertyDescriptionInput;
+  UpdatePropertyNameInput: UpdatePropertyNameInput;
+  UpdatePropertyS3FolderKeyInput: UpdatePropertyS3FolderKeyInput;
   UpdateUserFirstNameInput: UpdateUserFirstNameInput;
   UpdateUserLastNameInput: UpdateUserLastNameInput;
   UpdateUserPasswordInput: UpdateUserPasswordInput;
   UpdateUserPinInput: UpdateUserPinInput;
   UpdateUserUsernameInput: UpdateUserUsernameInput;
-  UpdateWorkOrderInput: UpdateWorkOrderInput;
+  UpdateWorkOrderChargedInput: UpdateWorkOrderChargedInput;
+  UpdateWorkOrderCommentsInput: UpdateWorkOrderCommentsInput;
+  UpdateWorkOrderCompletedByInput: UpdateWorkOrderCompletedByInput;
+  UpdateWorkOrderCustomerIdInput: UpdateWorkOrderCustomerIdInput;
+  UpdateWorkOrderDateInput: UpdateWorkOrderDateInput;
+  UpdateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
+  UpdateWorkOrderPaidInput: UpdateWorkOrderPaidInput;
+  UpdateWorkOrderPropertyIdInput: UpdateWorkOrderPropertyIdInput;
+  UpdateWorkOrderQuoteInput: UpdateWorkOrderQuoteInput;
+  UpdateWorkOrderTotalInput: UpdateWorkOrderTotalInput;
+  UpdateWorkOrderTypeInput: UpdateWorkOrderTypeInput;
   User: ResolverTypeWrapper<User>;
   WorkOrder: ResolverTypeWrapper<WorkOrder>;
-  createCustomerInput: CreateCustomerInput;
-  createPropertyInput: CreatePropertyInput;
-  createWorkOrderInput: CreateWorkOrderInput;
   imageObject: ResolverTypeWrapper<ImageObject>;
-  updatePropertyAddressInput: UpdatePropertyAddressInput;
-  updatePropertyAgentInput: UpdatePropertyAgentInput;
-  updatePropertyDescriptionInput: UpdatePropertyDescriptionInput;
-  updatePropertyNameInput: UpdatePropertyNameInput;
-  updatePropertyS3FolderKeyInput: UpdatePropertyS3FolderKeyInput;
-  updateWorkOrderChargedInput: UpdateWorkOrderChargedInput;
-  updateWorkOrderCommentsInput: UpdateWorkOrderCommentsInput;
-  updateWorkOrderCompletedByInput: UpdateWorkOrderCompletedByInput;
-  updateWorkOrderCustomerIdInput: UpdateWorkOrderCustomerIdInput;
-  updateWorkOrderDateInput: UpdateWorkOrderDateInput;
-  updateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
-  updateWorkOrderPaidInput: UpdateWorkOrderPaidInput;
-  updateWorkOrderPropertyIdInput: UpdateWorkOrderPropertyIdInput;
-  updateWorkOrderQuoteInput: UpdateWorkOrderQuoteInput;
-  updateWorkOrderTotalInput: UpdateWorkOrderTotalInput;
-  updateWorkOrderTypeInput: UpdateWorkOrderTypeInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -727,7 +713,10 @@ export type ResolversParentTypes = {
   AddressInput: AddressInput;
   Auth: Auth;
   Boolean: Scalars['Boolean']['output'];
+  CreateCustomerInput: CreateCustomerInput;
+  CreatePropertyInput: CreatePropertyInput;
   CreateUserInput: CreateUserInput;
+  CreateWorkOrderInput: CreateWorkOrderInput;
   Customer: Customer;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: DeleteS3ObjectResponse;
@@ -751,34 +740,30 @@ export type ResolversParentTypes = {
   UpdateCustomerFirstNameInput: UpdateCustomerFirstNameInput;
   UpdateCustomerLastNameInput: UpdateCustomerLastNameInput;
   UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
+  UpdatePropertyAddressInput: UpdatePropertyAddressInput;
+  UpdatePropertyAgentInput: UpdatePropertyAgentInput;
+  UpdatePropertyDescriptionInput: UpdatePropertyDescriptionInput;
+  UpdatePropertyNameInput: UpdatePropertyNameInput;
+  UpdatePropertyS3FolderKeyInput: UpdatePropertyS3FolderKeyInput;
   UpdateUserFirstNameInput: UpdateUserFirstNameInput;
   UpdateUserLastNameInput: UpdateUserLastNameInput;
   UpdateUserPasswordInput: UpdateUserPasswordInput;
   UpdateUserPinInput: UpdateUserPinInput;
   UpdateUserUsernameInput: UpdateUserUsernameInput;
-  UpdateWorkOrderInput: UpdateWorkOrderInput;
+  UpdateWorkOrderChargedInput: UpdateWorkOrderChargedInput;
+  UpdateWorkOrderCommentsInput: UpdateWorkOrderCommentsInput;
+  UpdateWorkOrderCompletedByInput: UpdateWorkOrderCompletedByInput;
+  UpdateWorkOrderCustomerIdInput: UpdateWorkOrderCustomerIdInput;
+  UpdateWorkOrderDateInput: UpdateWorkOrderDateInput;
+  UpdateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
+  UpdateWorkOrderPaidInput: UpdateWorkOrderPaidInput;
+  UpdateWorkOrderPropertyIdInput: UpdateWorkOrderPropertyIdInput;
+  UpdateWorkOrderQuoteInput: UpdateWorkOrderQuoteInput;
+  UpdateWorkOrderTotalInput: UpdateWorkOrderTotalInput;
+  UpdateWorkOrderTypeInput: UpdateWorkOrderTypeInput;
   User: User;
   WorkOrder: WorkOrder;
-  createCustomerInput: CreateCustomerInput;
-  createPropertyInput: CreatePropertyInput;
-  createWorkOrderInput: CreateWorkOrderInput;
   imageObject: ImageObject;
-  updatePropertyAddressInput: UpdatePropertyAddressInput;
-  updatePropertyAgentInput: UpdatePropertyAgentInput;
-  updatePropertyDescriptionInput: UpdatePropertyDescriptionInput;
-  updatePropertyNameInput: UpdatePropertyNameInput;
-  updatePropertyS3FolderKeyInput: UpdatePropertyS3FolderKeyInput;
-  updateWorkOrderChargedInput: UpdateWorkOrderChargedInput;
-  updateWorkOrderCommentsInput: UpdateWorkOrderCommentsInput;
-  updateWorkOrderCompletedByInput: UpdateWorkOrderCompletedByInput;
-  updateWorkOrderCustomerIdInput: UpdateWorkOrderCustomerIdInput;
-  updateWorkOrderDateInput: UpdateWorkOrderDateInput;
-  updateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
-  updateWorkOrderPaidInput: UpdateWorkOrderPaidInput;
-  updateWorkOrderPropertyIdInput: UpdateWorkOrderPropertyIdInput;
-  updateWorkOrderQuoteInput: UpdateWorkOrderQuoteInput;
-  updateWorkOrderTotalInput: UpdateWorkOrderTotalInput;
-  updateWorkOrderTypeInput: UpdateWorkOrderTypeInput;
 };
 
 export type AddressResolvers<ContextType = any, ParentType extends ResolversParentTypes['Address'] = ResolversParentTypes['Address']> = {
@@ -893,11 +878,12 @@ export type WorkOrderResolvers<ContextType = any, ParentType extends ResolversPa
   charged?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   completedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  customerId?: Resolver<ResolversTypes['Customer'], ParentType, ContextType>;
+  customerId?: Resolver<Maybe<ResolversTypes['Customer']>, ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  lastUpdated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   paid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  propertyId?: Resolver<ResolversTypes['Property'], ParentType, ContextType>;
+  propertyId?: Resolver<Maybe<ResolversTypes['Property']>, ParentType, ContextType>;
   quote?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   total?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

@@ -6,6 +6,10 @@ const workOrderSchema: Schema<WorkOrder> = new Schema<WorkOrder>({
 		type: String,
 		required: true,
 	},
+	lastUpdated: {
+		type: String,
+		required: true,
+	},
 	customerId: {
 		type: Schema.Types.ObjectId,
 		required: true,

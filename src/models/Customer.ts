@@ -28,6 +28,7 @@ const customerSchema: Schema<Customer> = new Schema<Customer>({
 			ref: 'WorkOrder',
 		},
 	],
+	
 });
 
 const Customer = model<Customer>('Customer', customerSchema);

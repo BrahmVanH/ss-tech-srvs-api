@@ -93,6 +93,7 @@ type Customer {
 	phone: Int!
 	businessName: String!
 	workOrders: [WorkOrder]
+	invoices: [Invoice]
 }
 
 input NewCustomerInput {
@@ -103,7 +104,7 @@ input NewCustomerInput {
 	businessName: String!
 }
 
-input createCustomerInput {
+input CreateCustomerInput {
 	customer: NewCustomerInput!
 }
 
@@ -128,7 +129,10 @@ input UpdateCustomerPhoneInput {
 	phone: Int!
 }
 
-
+input UpdateCustomerInvoicesInput {
+	customerId: ID!
+	invoice: ID
+}
 
 input UpdateCustomerBusinessNameInput {
 	customerId: ID!
@@ -138,6 +142,67 @@ input UpdateCustomerBusinessNameInput {
 input RemoveCustomerInput {
 	customerId: ID!
 }
+
+# Invoices & CRUD Types
+
+type Invoice {
+	_id: ID!
+	date: String!
+	customerId: Customer!
+	workOrders: [WorkOrder!]
+	total: Float!
+	charged: Boolean!
+	paid: Boolean!
+}
+
+input NewInvoiceInput {
+	date: String!
+	customerId: ID!
+	workOrders: [ID!]!
+	total: Float!
+	charged: Boolean!
+	paid: Boolean!
+}
+
+input CreateInvoiceInput {
+	invoice: NewInvoiceInput!
+}
+
+input UpdateInvoiceDateInput {
+	invoiceId: ID!
+	date: String!
+}
+
+input UpdateInvoiceCustomerIdInput {
+	invoiceId: ID!
+	customerId: ID!
+}
+
+input UpdateInvoiceWorkOrdersInput {
+	invoiceId: ID!
+	workOrders: [ID!]!
+}
+
+input UpdateInvoiceTotalInput {
+	invoiceId: ID!
+	total: Float!
+}
+
+input UpdateInvoiceChargedInput {
+	invoiceId: ID!
+	charged: Boolean!
+}
+
+input UpdateInvoicePaidInput {
+	invoiceId: ID!
+	paid: Boolean!
+}
+
+input RemoveInvoiceInput {
+	invoiceId: ID!
+}
+
+
 
 
 # Address & CRUD Type
@@ -180,31 +245,31 @@ input NewPropertyInput {
 	agent: ID!
 }
 
-input createPropertyInput {
+input CreatePropertyInput {
 	property: NewPropertyInput!
 }
 
-input updatePropertyNameInput {
+input UpdatePropertyNameInput {
 	propertyId: ID!
 	propertyName: String!
 }
 
-input updatePropertyDescriptionInput {
+input UpdatePropertyDescriptionInput {
 	propertyId: ID!
 	propertyDescription: String!
 }
 
-input updatePropertyAddressInput {
+input UpdatePropertyAddressInput {
 	propertyId: ID!
 	propertyAddress: AddressInput!
 }
 
-input updatePropertyAgentInput {
+input UpdatePropertyAgentInput {
 	propertyId: ID!
 	agent: ID!
 }
 
-input updatePropertyS3FolderKeyInput {
+input UpdatePropertyS3FolderKeyInput {
 	propertyId: ID!
 	s3FolderKey: String!
 }
@@ -220,8 +285,10 @@ input RemovePropertyInput {
 type WorkOrder {
 	_id: ID!
 	date: String!
-	customerId: Customer!
-	propertyId: Property!
+	lastUpdated: String!
+	customerId: Customer
+	propertyId: Property
+	invoices: [Invoice]
 	type: String!
 	description: String!
 	completedBy: String!
@@ -248,75 +315,66 @@ input NewWorkOrderInput {
 
 }
 
-input createWorkOrderInput {
+input CreateWorkOrderInput {
 	workOrder: NewWorkOrderInput!
 }
 
-input UpdateWorkOrderInput {
-	date: String
-	customerId: ID 
-	propertyId: ID 
-	type: String 
-	description: String 
-	completedBy: String 
-	quote: Float
-	total: Float
-	charged: Boolean 
-	paid: Boolean 
-	comments: String
-}
-
-input updateWorkOrderDateInput {
+input UpdateWorkOrderDateInput {
 	workOrderId: ID!
 	date: String!
 }
 
-input updateWorkOrderCustomerIdInput {
+input UpdateWorkOrderCustomerIdInput {
 	workOrderId: ID!
 	customerId: ID!
 }
 
-input updateWorkOrderPropertyIdInput {
+input UpdateWorkOrderPropertyIdInput {
 	workOrderId: ID!
 	propertyId: ID!
 }
 
-input updateWorkOrderTypeInput {
+input UpdateWorkOrderInvoicesInput {
+	workOrderId: ID!
+	invoice: ID
+}
+
+input UpdateWorkOrderTypeInput {
 	workOrderId: ID!
 	type: String!
 }
 
-input updateWorkOrderDescriptionInput {
+input UpdateWorkOrderDescriptionInput {
 	workOrderId: ID!
 	description: String!
 }
 
-input updateWorkOrderCompletedByInput {
+input UpdateWorkOrderCompletedByInput {
 	workOrderId: ID!
 	completedBy: String!
 }
 
-input updateWorkOrderQuoteInput {
+input UpdateWorkOrderQuoteInput {
 	workOrderId: ID!
 	quote: Float!
 }
 
-input updateWorkOrderTotalInput {
+input UpdateWorkOrderTotalInput {
 	workOrderId: ID!
 	total: Float!
 }
 
-input updateWorkOrderChargedInput {
+input UpdateWorkOrderChargedInput {
 	workOrderId: ID!
 	charged: Boolean!
 }
 
-input updateWorkOrderPaidInput {
+input UpdateWorkOrderPaidInput {
 	workOrderId: ID!
 	paid: Boolean!
 }
 
-input updateWorkOrderCommentsInput {
+input UpdateWorkOrderCommentsInput {
 	workOrderId: ID!
 	comments: String!
 }
@@ -350,6 +408,13 @@ type Query {
 	queryWorkOrdersByCustomer(customerId: ID!): [WorkOrder!]
 	queryWorkOrdersByProperty(propertyId: ID!): [WorkOrder!]
 
+	# Invoice Queries
+	queryInvoices: [Invoice!]
+	queryInvoiceById(invoiceId: ID!): Invoice!
+	queryInvoicesByCustomer(customerId: ID!): [Invoice!]
+	queryInvoicesByWorkOrder(workOrderId: ID!): [Invoice!]
+
+
 	# S3 Queries
 	getPresignedS3Url(imgKey: String!, commandType: String!, altTag: String!): String!
 
@@ -370,7 +435,7 @@ type Mutation {
 	removeUser(input: RemoveUserInput!): Auth!
 
 	# Customer Mutations
-	createCustomer(input: createCustomerInput!): Customer!
+	createCustomer(input: CreateCustomerInput!): Customer!
 	updateCustomerFirstName(input: UpdateCustomerFirstNameInput!): Customer!
 	updateCustomerLastName(input: UpdateCustomerLastNameInput!): Customer!
 	updateCustomerEmail(input: UpdateCustomerEmailInput!): Customer!
@@ -380,28 +445,39 @@ type Mutation {
 
 
 	# Property Mutations
-	createProperty(input: createPropertyInput!): Property!
-	updatePropertyName(input: updatePropertyNameInput!): Property!
-	updatePropertyDescription(input: updatePropertyDescriptionInput!): Property!
-	updatePropertyAddress(input: updatePropertyAddressInput!): Property!
-	updatePropertyAgent(input: updatePropertyAgentInput!): Property!
-	updatePropertyS3FolderKey(input: updatePropertyS3FolderKeyInput!): Property!
+	createProperty(input: CreatePropertyInput!): Property!
+	updatePropertyName(input: UpdatePropertyNameInput!): Property!
+	updatePropertyDescription(input: UpdatePropertyDescriptionInput!): Property!
+	updatePropertyAddress(input: UpdatePropertyAddressInput!): Property!
+	updatePropertyAgent(input: UpdatePropertyAgentInput!): Property!
+	updatePropertyS3FolderKey(input: UpdatePropertyS3FolderKeyInput!): Property!
 	deleteProperty(input: RemovePropertyInput!): Property!
 
 	# WorkOrder Mutations
-	createWorkOrder(input: createWorkOrderInput!): WorkOrder!
-	updateWorkOrderDate(input: updateWorkOrderDateInput!): WorkOrder!
-	updateWorkOrderCustomerId(input: updateWorkOrderCustomerIdInput!): WorkOrder!
-	updateWorkOrderPropertyId(input: updateWorkOrderPropertyIdInput!): WorkOrder!
-	updateWorkOrderType(input: updateWorkOrderTypeInput!): WorkOrder!
-	updateWorkOrderDescription(input: updateWorkOrderDescriptionInput!): WorkOrder!
-	updateWorkOrderCompletedBy(input: updateWorkOrderCompletedByInput!): WorkOrder!
-	updateWorkOrderQuote(input: updateWorkOrderQuoteInput!): WorkOrder!
-	updateWorkOrderTotal(input: updateWorkOrderTotalInput!): WorkOrder!
-	updateWorkOrderCharged(input: updateWorkOrderChargedInput!): WorkOrder!
-	updateWorkOrderPaid(input: updateWorkOrderPaidInput!): WorkOrder!
-	updateWorkOrderComments(input: updateWorkOrderCommentsInput!): WorkOrder!
+	createWorkOrder(input: CreateWorkOrderInput!): WorkOrder!
+	updateWorkOrderDate(input: UpdateWorkOrderDateInput!): WorkOrder!
+	updateWorkOrderCustomerId(input: UpdateWorkOrderCustomerIdInput!): WorkOrder!
+	updateWorkOrderPropertyId(input: UpdateWorkOrderPropertyIdInput!): WorkOrder!
+	updateWorkOrderType(input: UpdateWorkOrderTypeInput!): WorkOrder!
+	updateWorkOrderDescription(input: UpdateWorkOrderDescriptionInput!): WorkOrder!
+	updateWorkOrderCompletedBy(input: UpdateWorkOrderCompletedByInput!): WorkOrder!
+	updateWorkOrderQuote(input: UpdateWorkOrderQuoteInput!): WorkOrder!
+	updateWorkOrderTotal(input: UpdateWorkOrderTotalInput!): WorkOrder!
+	updateWorkOrderCharged(input: UpdateWorkOrderChargedInput!): WorkOrder!
+	updateWorkOrderPaid(input: UpdateWorkOrderPaidInput!): WorkOrder!
+	updateWorkOrderComments(input: UpdateWorkOrderCommentsInput!): WorkOrder!
 	deleteWorkOrder(input: RemoveWorkOrderInput!): WorkOrder!
+
+	# Invoice Mutations
+	createInvoice(input: CreateInvoiceInput!): Invoice!
+	updateInvoiceDate(input: UpdateInvoiceDateInput!): Invoice!
+	updateInvoiceCustomerId(input: UpdateInvoiceCustomerIdInput!): Invoice!
+	updateInvoiceWorkOrders(input: UpdateInvoiceWorkOrdersInput!): Invoice!
+	updateInvoiceTotal(input: UpdateInvoiceTotalInput!): Invoice!
+	updateInvoiceCharged(input: UpdateInvoiceChargedInput!): Invoice!
+	updateInvoicePaid(input: UpdateInvoicePaidInput!): Invoice!
+	deleteInvoice(input: RemoveInvoiceInput!): Invoice!
+	
 
 	# S3 Mutations
 

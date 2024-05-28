@@ -653,7 +653,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const newWorkOrder = await WorkOrder.create(workOrder);
+				const newWorkOrder = await WorkOrder.create({...workOrder, lastUpdated: new Date()});
 
 				if (!newWorkOrder) {
 					throw new Error('Could not create work order');
@@ -673,7 +673,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { date }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { date, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order date');
@@ -693,7 +693,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { customerId }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { customerId, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order customer ID');
@@ -713,7 +713,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { propertyId }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { propertyId, lastUpdated: new Date()}, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order property ID');
@@ -733,7 +733,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { type }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { type, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order type');
@@ -753,7 +753,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { description }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { description, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order description');
@@ -773,7 +773,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { completedBy }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { completedBy, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order completed by');
@@ -793,7 +793,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { quote }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { quote, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order quote');
@@ -813,7 +813,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { total }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { total, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order total');
@@ -833,7 +833,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { charged }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { charged, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order charged');
@@ -853,7 +853,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { paid }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { paid, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order paid');
@@ -873,7 +873,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { comments }, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { comments, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order comments');
