@@ -17,6 +17,10 @@ const AddressSchema: Schema<Address> = new Schema<Address>({
 		type: String,
 		required: true,
 	},
+	country: {
+		type: String,
+		required: true,
+	},
 	zip: {
 		type: String,
 		required: true,

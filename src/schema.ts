@@ -89,18 +89,19 @@ type Customer {
 	createdAt: String!
 	firstName: String!
 	lastName: String!
-	email: String
-	phone: Int!
+	email: String!
+	phone: String!
 	businessName: String!
-	workOrders: [WorkOrder]
-	invoices: [Invoice]
+	workOrders: [WorkOrder]!
+	invoices: [Invoice]!
+	properties: [Property]!
 }
 
 input NewCustomerInput {
 	firstName: String!
 	lastName: String!
 	email: String
-	phone: Int!
+	phone: String!
 	businessName: String!
 }
 
@@ -126,7 +127,7 @@ input UpdateCustomerEmailInput {
 
 input UpdateCustomerPhoneInput {
 	customerId: ID!
-	phone: Int!
+	phone: String!
 }
 
 input UpdateCustomerInvoicesInput {
@@ -139,6 +140,11 @@ input UpdateCustomerBusinessNameInput {
 	businessName: String!
 }
 
+input UpdateCustomerPropertiesInput {
+	customerId: ID!
+	property: ID
+}
+
 input RemoveCustomerInput {
 	customerId: ID!
 }
@@ -147,9 +153,11 @@ input RemoveCustomerInput {
 
 type Invoice {
 	_id: ID!
+	invoiceNumber: String!
 	date: String!
 	customerId: Customer!
-	workOrders: [WorkOrder!]
+	workOrders: [WorkOrder]!
+	quote: Float!
 	total: Float!
 	charged: Boolean!
 	paid: Boolean!
@@ -157,9 +165,11 @@ type Invoice {
 
 input NewInvoiceInput {
 	date: String!
+	invoiceNumber: String!
 	customerId: ID!
-	workOrders: [ID!]!
-	total: Float!
+	workOrders: [ID]
+	quote: Float
+	total: Float
 	charged: Boolean!
 	paid: Boolean!
 }
@@ -196,6 +206,11 @@ input UpdateInvoiceChargedInput {
 input UpdateInvoicePaidInput {
 	invoiceId: ID!
 	paid: Boolean!
+}
+
+input UpdateInvoiceQuoteInput {
+	invoiceId: ID!
+	quote: Float!
 }
 
 input RemoveInvoiceInput {
@@ -243,6 +258,7 @@ input NewPropertyInput {
 	propertyAddress: AddressInput!
 	propertyDescription: String!
 	agent: ID!
+	s3FolderKey: String
 }
 
 input CreatePropertyInput {
@@ -286,17 +302,17 @@ type WorkOrder {
 	_id: ID!
 	date: String!
 	lastUpdated: String!
-	customerId: Customer
-	propertyId: Property
-	invoices: [Invoice]
+	customerId: Customer!
+	propertyId: Property!
+	invoices: [Invoice]!
 	type: String!
 	description: String!
 	completedBy: String!
-	quote: Float
-	total: Float
+	quote: Float!
+	total: Float!
 	charged: Boolean!
 	paid: Boolean!
-	comments: String
+	comments: String!
 	}
 
 
@@ -306,7 +322,7 @@ input NewWorkOrderInput {
 	propertyId: ID!
 	type: String!
 	description: String!
-	completedBy: String!
+	completedBy: String
 	quote: Float
 	total: Float
 	charged: Boolean!
@@ -382,7 +398,7 @@ input UpdateWorkOrderCommentsInput {
 
 
 input RemoveWorkOrderInput {
-	workOrderIds: [ID!]!
+	workOrderId: ID!
 }
 
 
@@ -441,6 +457,7 @@ type Mutation {
 	updateCustomerEmail(input: UpdateCustomerEmailInput!): Customer!
 	updateCustomerPhone(input: UpdateCustomerPhoneInput!): Customer!
 	updateCustomerBusinessName(input: UpdateCustomerBusinessNameInput!): Customer!
+	updateCustomerProperties(input: UpdateCustomerPropertiesInput!): Customer!
 	deleteCustomer(input: RemoveCustomerInput!): Customer!
 
 
@@ -473,6 +490,7 @@ type Mutation {
 	updateInvoiceDate(input: UpdateInvoiceDateInput!): Invoice!
 	updateInvoiceCustomerId(input: UpdateInvoiceCustomerIdInput!): Invoice!
 	updateInvoiceWorkOrders(input: UpdateInvoiceWorkOrdersInput!): Invoice!
+	updateInvoiceQuote(input: UpdateInvoiceQuoteInput!): Invoice!
 	updateInvoiceTotal(input: UpdateInvoiceTotalInput!): Invoice!
 	updateInvoiceCharged(input: UpdateInvoiceChargedInput!): Invoice!
 	updateInvoicePaid(input: UpdateInvoicePaidInput!): Invoice!

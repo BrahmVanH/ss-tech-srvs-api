@@ -52,8 +52,14 @@ const workOrderSchema: Schema<WorkOrder> = new Schema<WorkOrder>({
 		type: String,
 		required: false,
 	},
+	invoices: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'Invoice',
+		},
+	],
 });
 
-const WorkOrder = model<WorkOrder>('WordOrder', workOrderSchema);
+const WorkOrder = model<WorkOrder>('WorkOrder', workOrderSchema);
 
 export default WorkOrder;

@@ -32,9 +32,22 @@ import {
 	MutationUpdateWorkOrderChargedArgs,
 	MutationUpdateWorkOrderPaidArgs,
 	MutationUpdateWorkOrderCommentsArgs,
+	MutationCreateInvoiceArgs,
+	MutationDeleteInvoiceArgs,
+	MutationUpdateInvoicePaidArgs,
+	MutationUpdateInvoiceTotalArgs,
+	MutationUpdateInvoiceWorkOrdersArgs,
+	MutationUpdateInvoiceCustomerIdArgs,
+	MutationUpdateInvoiceDateArgs,
+	MutationUpdateInvoiceQuoteArgs,
+	MutationLoginUserArgs,
+	MutationDeletePropertyArgs,
+	MutationDeleteWorkOrderArgs,
+	MutationUpdateCustomerPropertiesArgs,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
+import Invoice from './models/Invoice';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -61,8 +74,8 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const customers = await Customer.find();
-
+				const customers = await Customer.find().populate('workOrders').populate('invoices');
+				console.log('customers', customers);
 				if (!customers) {
 					throw new Error('Error fetching all customers from database');
 				}
@@ -81,7 +94,7 @@ const resolvers: Resolvers = {
 					throw new Error('No customer ID was presented for querying customer');
 				}
 
-				const customer = await Customer.findOne({ _id: customerId });
+				const customer = await Customer.findOne({ _id: customerId }).populate('workOrders').populate('invoices');
 
 				if (!customer) {
 					throw new Error('Cannot find customer in database');
@@ -117,7 +130,7 @@ const resolvers: Resolvers = {
 					throw new Error('No property ID was presented for querying property');
 				}
 
-				const property = await Property.findOne({ _id: propertyId });
+				const property = await Property.findOne({ _id: propertyId }).populate('agent');
 
 				if (!property) {
 					throw new Error('Cannot find property in database');
@@ -193,7 +206,7 @@ const resolvers: Resolvers = {
 					throw new Error('No work order ID was presented for querying work order');
 				}
 
-				const workOrder = await WorkOrder.findOne({ _id: workOrderId });
+				const workOrder = await WorkOrder.findOne({ _id: workOrderId }).populate('invoices');
 
 				if (!workOrder) {
 					throw new Error('Cannot find work order in database');
@@ -203,6 +216,82 @@ const resolvers: Resolvers = {
 			} catch (err: any) {
 				console.error({ message: 'error in finding work order', details: err });
 				throw new Error('Error in finding work order: ' + err.message);
+			}
+		},
+		queryInvoices: async () => {
+			try {
+				await connectToDb();
+
+				const invoices = await Invoice.find();
+
+				if (!invoices) {
+					throw new Error('Error fetching all invoices from database');
+				}
+
+				return invoices;
+			} catch (err: any) {
+				console.error({ message: 'error in finding invoices', details: err });
+				throw new Error('Error in finding invoices: ' + err.message);
+			}
+		},
+		queryInvoiceById: async (_: {}, { invoiceId }: { invoiceId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!invoiceId) {
+					throw new Error('No invoice ID was presented for querying invoice');
+				}
+
+				const invoice = await Invoice.findOne({ _id: invoiceId }).populate('workOrders').populate('customerId');
+
+				if (!invoice) {
+					throw new Error('Cannot find invoice in database');
+				}
+
+				return invoice;
+			} catch (err: any) {
+				console.error({ message: 'error in finding invoice', details: err });
+				throw new Error('Error in finding invoice: ' + err.message);
+			}
+		},
+		queryInvoicesByCustomer: async (_: {}, { customerId }: { customerId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!customerId) {
+					throw new Error('No customer name was presented for querying invoices');
+				}
+
+				const invoices = await Invoice.find({ customerId });
+
+				if (!invoices) {
+					throw new Error('Cannot find invoices in database');
+				}
+
+				return invoices;
+			} catch (err: any) {
+				console.error({ message: 'error in finding invoices', details: err });
+				throw new Error('Error in finding invoices: ' + err.message);
+			}
+		},
+		queryInvoicesByWorkOrder: async (_: {}, { workOrderId }: { workOrderId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!workOrderId) {
+					throw new Error('No work order name was presented for querying invoices');
+				}
+
+				const invoices = await Invoice.find({ workOrders: { _id: workOrderId } });
+
+				if (!invoices) {
+					throw new Error('Cannot find invoices in database');
+				}
+
+				return invoices;
+			} catch (err: any) {
+				console.error({ message: 'error in finding invoices', details: err });
+				throw new Error('Error in finding invoices: ' + err.message);
 			}
 		},
 		// getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
@@ -383,29 +472,35 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating user pin: ' + err.message);
 			}
 		},
-		loginUser: async (_: {}, args: any, __: any) => {
-			const { username, userPassword } = args.input;
+		loginUser: async (_: {}, args: MutationLoginUserArgs, __: any) => {
+			console.log('args', args);
+
+			const { username, userPassword: enteredPassword } = args.input;
 
 			try {
 				await connectToDb();
 
-				if (!username || !userPassword) {
+				if (!username || !enteredPassword) {
 					throw new Error('username and password fields must be filled to log in');
 				}
 
-				const user = await User.findOne({ username });
+				const user: IUser | null = await User.findOne({ username });
 
 				if (!user) {
 					throw new Error('Could not find user');
 				}
 
-				const existingPasswordIsCorrect = await comparePassword(userPassword, userPassword);
+				console.log('user', user);
+
+				const existingPasswordIsCorrect = await comparePassword(enteredPassword, user.password as string);
 
 				if (!existingPasswordIsCorrect) {
 					throw new Error('Incorrect password');
 				}
 
 				const token = signToken(user);
+				console.log('token', token);
+				console.log('user', user);
 				return { token, user };
 			} catch (err: any) {
 				throw new Error('Error in logging in user: ' + err.message);
@@ -453,7 +548,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const newCustomer = await Customer.create(customer);
+				const newCustomer = await Customer.create({ ...customer, email: customer.email ?? '', workOrders: [], invoices: [] });
 
 				if (!newCustomer) {
 					throw new Error('Could not create customer');
@@ -524,6 +619,26 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating customer business name: ' + err.message);
 			}
 		},
+		updateCustomerProperties: async (_: {}, args: MutationUpdateCustomerPropertiesArgs, __: any) => {
+			const { customerId, property } = args.input;
+			if (!customerId || !property) {
+				throw new Error('customerId and properties fields must be filled to update customer properties');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { properties: {$push: property} }, { new: true });
+
+				if (!updatedCustomer) {
+					throw new Error('Could not update customer properties');
+				}
+
+				return updatedCustomer;
+			} catch (err: any) {
+				throw new Error('Error in updating customer properties: ' + err.message);
+			}
+		},
 		deleteCustomer: async (_: {}, args: MutationDeleteCustomerArgs, __: any) => {
 			const { customerId } = args.input;
 			if (!customerId) {
@@ -553,10 +668,16 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const newProperty = await Property.create(property);
+				const newProperty = await Property.create({...property, s3FolderKey: property.s3FolderKey ?? ''});
 
 				if (!newProperty) {
 					throw new Error('Could not create property');
+				}
+
+				const customer = await Customer.findOneAndUpdate({ _id: property.agent }, { $push: { properties: newProperty._id } });
+
+				if (!customer) {
+					throw new Error('Could not update customer with new property');
 				}
 
 				return newProperty;
@@ -644,6 +765,26 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating property s3FolderKey: ' + err.message);
 			}
 		},
+		deleteProperty: async (_: {}, args: MutationDeletePropertyArgs, __: any) => {
+			const { propertyId } = args.input;
+			if (!propertyId) {
+				throw new Error('No property ID was presented for deleting property');
+			}
+
+			try {
+				await connectToDb();
+
+				const deletedProperty = await Property.findOneAndDelete({ _id: propertyId });
+
+				if (!deletedProperty) {
+					throw new Error('Could not delete property');
+				}
+
+				return deletedProperty;
+			} catch (err: any) {
+				throw new Error('Error in deleting property: ' + err.message);
+			}
+		},
 		createWorkOrder: async (_: {}, args: MutationCreateWorkOrderArgs, __: any) => {
 			const { workOrder } = args.input;
 			if (!workOrder) {
@@ -653,10 +794,24 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const newWorkOrder = await WorkOrder.create({...workOrder, lastUpdated: new Date()});
+				const newWorkOrder = await WorkOrder.create({
+					...workOrder,
+					lastUpdated: new Date(),
+					completedBy: workOrder.completedBy ?? '',
+					quote: workOrder.quote ?? 0,
+					total: workOrder.total ?? 0,
+					comments: workOrder.comments ?? '',
+					invoices: [],
+				});
 
 				if (!newWorkOrder) {
 					throw new Error('Could not create work order');
+				}
+
+				const customer = await Customer.findOneAndUpdate({ _id: workOrder.customerId }, { $push: { workOrders: newWorkOrder._id } });
+
+				if (!customer) {
+					throw new Error('Could not update customer with new work order');
 				}
 
 				return newWorkOrder;
@@ -713,7 +868,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { propertyId, lastUpdated: new Date()}, { new: true });
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { propertyId, lastUpdated: new Date() }, { new: true });
 
 				if (!updatedWorkOrder) {
 					throw new Error('Could not update work order property ID');
@@ -884,7 +1039,7 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating work order comments: ' + err.message);
 			}
 		},
-		deleteWorkOrder: async (_: {}, args: any, __: any) => {
+		deleteWorkOrder: async (_: {}, args: MutationDeleteWorkOrderArgs, __: any) => {
 			const { workOrderId } = args.input;
 			if (!workOrderId) {
 				throw new Error('No work order ID was presented for deleting work order');
@@ -902,6 +1057,182 @@ const resolvers: Resolvers = {
 				return deletedWorkOrder;
 			} catch (err: any) {
 				throw new Error('Error in deleting work order: ' + err.message);
+			}
+		},
+		createInvoice: async (_: {}, args: MutationCreateInvoiceArgs, __: any) => {
+			const { invoice } = args.input;
+			if (!invoice) {
+				throw new Error('No invoice object was presented for creating invoice');
+			}
+
+			try {
+				await connectToDb();
+
+				const newInvoice = await Invoice.create({ ...invoice, workOrders: invoice.workOrders ?? [], quote: invoice.quote ?? 0, total: invoice.total ?? 0 });
+
+				if (!newInvoice) {
+					throw new Error('Could not create invoice');
+				}
+
+				invoice.workOrders?.forEach(async (workOrderId) => {
+					try {
+						const workOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { $push: { invoices: newInvoice._id } });
+						if (!workOrder) {
+							throw new Error('Could not update work order with new invoice');
+						}
+					} catch (err: any) {
+						throw new Error('Error in updating work order with new invoice: ' + err.message);
+					}
+				});
+
+				const customer = await Customer.findOneAndUpdate({ _id: invoice.customerId }, { $push: { invoices: newInvoice._id } });
+
+				if (!customer) {
+					throw new Error('Could not update customer with new invoice');
+				}
+				return newInvoice;
+			} catch (err: any) {
+				throw new Error('Error in creating invoice: ' + err.message);
+			}
+		},
+		updateInvoiceDate: async (_: {}, args: MutationUpdateInvoiceDateArgs, __: any) => {
+			const { invoiceId, date } = args.input;
+			if (!invoiceId || !date) {
+				throw new Error('invoiceId and date fields must be filled to update invoice date');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { date }, { new: true });
+
+				if (!updatedInvoice) {
+					throw new Error('Could not update invoice date');
+				}
+
+				return updatedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in updating invoice date: ' + err.message);
+			}
+		},
+		updateInvoiceCustomerId: async (_: {}, args: MutationUpdateInvoiceCustomerIdArgs, __: any) => {
+			const { invoiceId, customerId } = args.input;
+			if (!invoiceId || !customerId) {
+				throw new Error('invoiceId and customerId fields must be filled to update invoice customer ID');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { customerId }, { new: true });
+
+				if (!updatedInvoice) {
+					throw new Error('Could not update invoice customer ID');
+				}
+
+				return updatedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in updating invoice customer ID: ' + err.message);
+			}
+		},
+		updateInvoiceWorkOrders: async (_: {}, args: MutationUpdateInvoiceWorkOrdersArgs, __: any) => {
+			const { invoiceId, workOrders } = args.input;
+			if (!invoiceId || !workOrders) {
+				throw new Error('invoiceId and workOrders fields must be filled to update invoice work orders');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { workOrders }, { new: true });
+
+				if (!updatedInvoice) {
+					throw new Error('Could not update invoice work orders');
+				}
+
+				return updatedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in updating invoice work orders: ' + err.message);
+			}
+		},
+		updateInvoiceQuote: async (_: {}, args: MutationUpdateInvoiceQuoteArgs, __: any) => {
+			const { invoiceId, quote } = args.input;
+			if (!invoiceId || !quote) {
+				throw new Error('invoiceId and quote fields must be filled to update invoice quote');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { quote }, { new: true });
+
+				if (!updatedInvoice) {
+					throw new Error('Could not update invoice quote');
+				}
+
+				return updatedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in updating invoice quote: ' + err.message);
+			}
+		},
+		updateInvoiceTotal: async (_: {}, args: MutationUpdateInvoiceTotalArgs, __: any) => {
+			const { invoiceId, total } = args.input;
+			if (!invoiceId || !total) {
+				throw new Error('invoiceId and total fields must be filled to update invoice total');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { total }, { new: true });
+
+				if (!updatedInvoice) {
+					throw new Error('Could not update invoice total');
+				}
+
+				return updatedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in updating invoice total: ' + err.message);
+			}
+		},
+		updateInvoicePaid: async (_: {}, args: MutationUpdateInvoicePaidArgs, __: any) => {
+			const { invoiceId, paid } = args.input;
+			if (!invoiceId || paid === undefined) {
+				throw new Error('invoiceId and paid fields must be filled to update invoice paid');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { paid }, { new: true });
+
+				if (!updatedInvoice) {
+					throw new Error('Could not update invoice paid');
+				}
+
+				return updatedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in updating invoice paid: ' + err.message);
+			}
+		},
+		deleteInvoice: async (_: {}, args: MutationDeleteInvoiceArgs, __: any) => {
+			const { invoiceId } = args.input;
+			if (!invoiceId) {
+				throw new Error('No invoice ID was presented for deleting invoice');
+			}
+
+			try {
+				await connectToDb();
+
+				const deletedInvoice = await Invoice.findOneAndDelete({ _id: invoiceId });
+
+				if (!deletedInvoice) {
+					throw new Error('Could not delete invoice');
+				}
+
+				return deletedInvoice;
+			} catch (err: any) {
+				throw new Error('Error in deleting invoice: ' + err.message);
 			}
 		},
 		// deleteS3Objects: async (_: {}, args: any, __: any) => {
