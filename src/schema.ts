@@ -89,6 +89,8 @@ type Customer {
 	createdAt: String!
 	firstName: String!
 	lastName: String!
+	email: String
+	phone: Int!
 	businessName: String!
 	workOrders: [WorkOrder]
 }
@@ -96,6 +98,8 @@ type Customer {
 input NewCustomerInput {
 	firstName: String!
 	lastName: String!
+	email: String
+	phone: Int!
 	businessName: String!
 }
 
@@ -113,6 +117,18 @@ input UpdateCustomerLastNameInput {
 	customerId: ID!
 	lastName: String!
 }
+
+input UpdateCustomerEmailInput {
+	customerId: ID!
+	email: String!
+}
+
+input UpdateCustomerPhoneInput {
+	customerId: ID!
+	phone: Int!
+}
+
+
 
 input UpdateCustomerBusinessNameInput {
 	customerId: ID!
@@ -357,6 +373,8 @@ type Mutation {
 	createCustomer(input: createCustomerInput!): Customer!
 	updateCustomerFirstName(input: UpdateCustomerFirstNameInput!): Customer!
 	updateCustomerLastName(input: UpdateCustomerLastNameInput!): Customer!
+	updateCustomerEmail(input: UpdateCustomerEmailInput!): Customer!
+	updateCustomerPhone(input: UpdateCustomerPhoneInput!): Customer!
 	updateCustomerBusinessName(input: UpdateCustomerBusinessNameInput!): Customer!
 	deleteCustomer(input: RemoveCustomerInput!): Customer!
 

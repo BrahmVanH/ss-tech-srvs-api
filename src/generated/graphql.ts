@@ -55,8 +55,10 @@ export type Customer = {
   _id: Scalars['ID']['output'];
   businessName: Scalars['String']['output'];
   createdAt: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
+  phone: Scalars['Int']['output'];
   workOrders?: Maybe<Array<Maybe<WorkOrder>>>;
 };
 
@@ -88,8 +90,10 @@ export type Mutation = {
   loginUser: Auth;
   removeUser: Auth;
   updateCustomerBusinessName: Customer;
+  updateCustomerEmail: Customer;
   updateCustomerFirstName: Customer;
   updateCustomerLastName: Customer;
+  updateCustomerPhone: Customer;
   updatePropertyAddress: Property;
   updatePropertyAgent: Property;
   updatePropertyDescription: Property;
@@ -169,6 +173,11 @@ export type MutationUpdateCustomerBusinessNameArgs = {
 };
 
 
+export type MutationUpdateCustomerEmailArgs = {
+  input: UpdateCustomerEmailInput;
+};
+
+
 export type MutationUpdateCustomerFirstNameArgs = {
   input: UpdateCustomerFirstNameInput;
 };
@@ -176,6 +185,11 @@ export type MutationUpdateCustomerFirstNameArgs = {
 
 export type MutationUpdateCustomerLastNameArgs = {
   input: UpdateCustomerLastNameInput;
+};
+
+
+export type MutationUpdateCustomerPhoneArgs = {
+  input: UpdateCustomerPhoneInput;
 };
 
 
@@ -285,8 +299,10 @@ export type MutationUpdateWorkOrderTypeArgs = {
 
 export type NewCustomerInput = {
   businessName: Scalars['String']['input'];
+  email?: InputMaybe<Scalars['String']['input']>;
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
+  phone: Scalars['Int']['input'];
 };
 
 export type NewPropertyInput = {
@@ -388,6 +404,11 @@ export type UpdateCustomerBusinessNameInput = {
   customerId: Scalars['ID']['input'];
 };
 
+export type UpdateCustomerEmailInput = {
+  customerId: Scalars['ID']['input'];
+  email: Scalars['String']['input'];
+};
+
 export type UpdateCustomerFirstNameInput = {
   customerId: Scalars['ID']['input'];
   firstName: Scalars['String']['input'];
@@ -396,6 +417,11 @@ export type UpdateCustomerFirstNameInput = {
 export type UpdateCustomerLastNameInput = {
   customerId: Scalars['ID']['input'];
   lastName: Scalars['String']['input'];
+};
+
+export type UpdateCustomerPhoneInput = {
+  customerId: Scalars['ID']['input'];
+  phone: Scalars['Int']['input'];
 };
 
 export type UpdateUserFirstNameInput = {
@@ -661,8 +687,10 @@ export type ResolversTypes = {
   RemoveWorkOrderInput: RemoveWorkOrderInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   UpdateCustomerBusinessNameInput: UpdateCustomerBusinessNameInput;
+  UpdateCustomerEmailInput: UpdateCustomerEmailInput;
   UpdateCustomerFirstNameInput: UpdateCustomerFirstNameInput;
   UpdateCustomerLastNameInput: UpdateCustomerLastNameInput;
+  UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
   UpdateUserFirstNameInput: UpdateUserFirstNameInput;
   UpdateUserLastNameInput: UpdateUserLastNameInput;
   UpdateUserPasswordInput: UpdateUserPasswordInput;
@@ -719,8 +747,10 @@ export type ResolversParentTypes = {
   RemoveWorkOrderInput: RemoveWorkOrderInput;
   String: Scalars['String']['output'];
   UpdateCustomerBusinessNameInput: UpdateCustomerBusinessNameInput;
+  UpdateCustomerEmailInput: UpdateCustomerEmailInput;
   UpdateCustomerFirstNameInput: UpdateCustomerFirstNameInput;
   UpdateCustomerLastNameInput: UpdateCustomerLastNameInput;
+  UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
   UpdateUserFirstNameInput: UpdateUserFirstNameInput;
   UpdateUserLastNameInput: UpdateUserLastNameInput;
   UpdateUserPasswordInput: UpdateUserPasswordInput;
@@ -772,8 +802,10 @@ export type CustomerResolvers<ContextType = any, ParentType extends ResolversPar
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   businessName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  phone?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   workOrders?: Resolver<Maybe<Array<Maybe<ResolversTypes['WorkOrder']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -796,8 +828,10 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   loginUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'input'>>;
   removeUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationRemoveUserArgs, 'input'>>;
   updateCustomerBusinessName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerBusinessNameArgs, 'input'>>;
+  updateCustomerEmail?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerEmailArgs, 'input'>>;
   updateCustomerFirstName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerFirstNameArgs, 'input'>>;
   updateCustomerLastName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerLastNameArgs, 'input'>>;
+  updateCustomerPhone?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerPhoneArgs, 'input'>>;
   updatePropertyAddress?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<MutationUpdatePropertyAddressArgs, 'input'>>;
   updatePropertyAgent?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<MutationUpdatePropertyAgentArgs, 'input'>>;
   updatePropertyDescription?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<MutationUpdatePropertyDescriptionArgs, 'input'>>;
