@@ -14,10 +14,12 @@ const customerSchema: Schema<Customer> = new Schema<Customer>({
 		type: String,
 		required: true,
 	},
-	workOrders: {
-		type: Schema.Types.ObjectId,
-		required: false,
-	},
+	workOrders: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'WorkOrder',
+		},
+	],
 });
 
 const Customer = model<Customer>('Customer', customerSchema);

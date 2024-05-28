@@ -198,14 +198,14 @@ input RemovePropertyInput {
 }
 
 
-# Workorder & CRUD Types
+# Work Order & CRUD Types
 
 
 type WorkOrder {
 	_id: ID!
 	date: String!
 	customerId: Customer!
-	propertyId: Property! 
+	propertyId: Property!
 	type: String!
 	description: String!
 	completedBy: String!

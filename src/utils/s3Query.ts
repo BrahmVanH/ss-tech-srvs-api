@@ -1,9 +1,9 @@
-import AWS from 'aws-sdk';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { GetObjectCommand, GetObjectTaggingCommand, ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client } from '@aws-sdk/client-s3';
-import { IHomeUrls, S3Object } from '../types';
-import { HideawayImgPack as IHideawayImgPack, CottageImgPack as ICottageImgPack, HomePgImgPack as IHomePgImgPack } from '../generated/graphql';
-import { createImgGalArr } from './helpers';
+// import AWS from 'aws-sdk';
+// import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+// import { GetObjectCommand, GetObjectTaggingCommand, ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client } from '@aws-sdk/client-s3';
+// import { IHomeUrls, S3Object } from '../types';
+// import { HideawayImgPack as IHideawayImgPack, CottageImgPack as ICottageImgPack, HomePgImgPack as IHomePgImgPack } from '../generated/graphql';
+// import { createImgGalArr } from './helpers';
 
 // const bucketName = process.env.S3_BUCKET_NAME ?? '';
 
