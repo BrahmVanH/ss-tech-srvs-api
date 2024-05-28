@@ -125,6 +125,7 @@ input RemoveCustomerInput {
 # Address & CRUD Type
 
 type Address {
+	_id: ID!
 	street: String!
 	unit: String!
 	city: String!
@@ -132,28 +133,6 @@ type Address {
 	zip: String!
 	country: String!
 
-}
-
-input CreateAddressInput {
-	street: String!
-	unit: String!
-	city: String!
-	state: String!
-	zip: String!
-	country: String!
-}
-
-input UpdateAddressInput {
-	street: String!
-	unit: String!
-	city: String!
-	state: String!
-	zip: String!
-	country: String!
-}
-
-input RemoveAddressInput {
-	addressId: ID!
 }
 
 # Property & CRUD Types
@@ -334,9 +313,6 @@ type Query {
 	queryCustomers: [Customer!]
 	queryCustomerById(customerId: ID!): Customer!
 
-	# Address Queries
-	queryAddresses: [Address!]
-
 	# Property Queries
 	queryProperties: [Property!]
 	queryPropertyById(propertyId: ID!): Property!
@@ -373,11 +349,6 @@ type Mutation {
 	updateCustomerBusinessName(input: UpdateCustomerBusinessNameInput!): Customer!
 	deleteCustomer(input: RemoveCustomerInput!): Customer!
 
-	# Address Mutations
-
-	createAddress(input: CreateAddressInput!): Address!
-	updateAddress(input: UpdateAddressInput!): Address!
-	deleteAddress(input: RemoveAddressInput!): Address!
 
 	# Property Mutations
 	createProperty(input: createPropertyInput!): Property!

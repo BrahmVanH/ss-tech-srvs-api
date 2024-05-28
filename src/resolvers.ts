@@ -5,7 +5,7 @@ import { signToken } from './utils/auth';
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
 
-const resolvers = {
+const resolvers: any = {
 	Query: {
 		getAllUsers: async () => {
 			try {
@@ -151,19 +151,19 @@ const resolvers = {
 				throw new Error('Error in finding work orders: ' + err.message);
 			}
 		},
-		getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
-			try {
-				const preSignedUrl = await getPresignedUrl(imgKey, commandType, altTag);
-				if (!preSignedUrl) {
-					console.error('Error in getting presigned URL');
-					throw new Error('Error in getting presigned URL');
-				}
-				return preSignedUrl;
-			} catch (err: any) {
-				throw new Error('Error in getting upload url for s3: ' + err.message);
-			}
-		},
-
+		// getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
+		// 	try {
+		// 		const preSignedUrl = await getPresignedUrl(imgKey, commandType, altTag);
+		// 		if (!preSignedUrl) {
+		// 			console.error('Error in getting presigned URL');
+		// 			throw new Error('Error in getting presigned URL');
+		// 		}
+		// 		return preSignedUrl;
+		// 	} catch (err: any) {
+		// 		throw new Error('Error in getting upload url for s3: ' + err.message);
+		// 	}
+		// },
+	},
 	Mutation: {
 		createUser: async (_: {}, args: any, __: any) => {
 			const { firstName, lastName, username, userPassword, adminCode } = args.input;
@@ -195,6 +195,106 @@ const resolvers = {
 				throw new Error('Error in creating user: ' + err.message);
 			}
 		},
+		updateUserFirstName: async (_: {}, args: any, __: any) => {
+			const { userId, firstName } = args.input;
+			if (!userId || !firstName) {
+				throw new Error('userId and firstName fields must be filled to update user first name');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { firstName }, { new: true });
+
+				if (!updatedUser) {
+					throw new Error('Could not update user first name');
+				}
+
+				return updatedUser;
+			} catch (err: any) {
+				throw new Error('Error in updating user first name: ' + err.message);
+			}
+		},
+		updateUserLastName: async (_: {}, args: any, __: any) => {
+			const { userId, lastName } = args.input;
+			if (!userId || !lastName) {
+				throw new Error('userId and lastName fields must be filled to update user last name');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { lastName }, { new: true });
+
+				if (!updatedUser) {
+					throw new Error('Could not update user last name');
+				}
+
+				return updatedUser;
+			} catch (err: any) {
+				throw new Error('Error in updating user last name: ' + err.message);
+			}
+		},
+		updateUserUsername: async (_: {}, args: any, __: any) => {
+			const { userId, username } = args.input;
+			if (!userId || !username) {
+				throw new Error('userId and username fields must be filled to update user username');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { username }, { new: true });
+
+				if (!updatedUser) {
+					throw new Error('Could not update user username');
+				}
+
+				return updatedUser;
+			} catch (err: any) {
+				throw new Error('Error in updating user username: ' + err.message);
+			}
+		},
+		updateUserPassword: async (_: {}, args: any, __: any) => {
+			const { userId, userPassword } = args.input;
+			if (!userId || !userPassword) {
+				throw new Error('userId and userPassword fields must be filled to update user password');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { password: userPassword }, { new: true });
+
+				if (!updatedUser) {
+					throw new Error('Could not update user password');
+				}
+
+				return updatedUser;
+			} catch (err: any) {
+				throw new Error('Error in updating user password: ' + err.message);
+			}
+		},
+		updateUserPin: async (_: {}, args: any, __: any) => {
+			const { userId, pin } = args.input;
+			if (!userId || !pin) {
+				throw new Error('userId and pin fields must be filled to update user pin');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { pin }, { new: true });
+
+				if (!updatedUser) {
+					throw new Error('Could not update user pin');
+				}
+
+				return updatedUser;
+			} catch (err: any) {
+				throw new Error('Error in updating user pin: ' + err.message);
+			}
+		},
 		loginUser: async (_: {}, args: any, __: any) => {
 			try {
 				const { username, userPassword } = args.input;
@@ -220,7 +320,7 @@ const resolvers = {
 				throw new Error('Error in logging in user: ' + err.message);
 			}
 		},
-		deleteUser: async (_: {}, args: any, __: any) => {
+		removeUser: async (_: {}, args: any, __: any) => {
 			try {
 				const { username, userPassword } = args.input;
 				await connectToDb();
@@ -267,24 +367,64 @@ const resolvers = {
 				throw new Error('Error in creating customer: ' + err.message);
 			}
 		},
-		updateCustomer: async (_: {}, args: any, __: any) => {
-			const { customerId, customer } = args.input;
-			if (!customerId || !customer) {
-				throw new Error('No customer object was presented for updating customer');
+		updateCustomerFirstName: async (_: {}, args: any, __: any) => {
+			const { customerId, firstName } = args.input;
+			if (!customerId || !firstName) {
+				throw new Error('customerId and firstName fields must be filled to update customer first name');
 			}
 
 			try {
 				await connectToDb();
 
-				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, customer, { new: true });
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { firstName }, { new: true });
 
 				if (!updatedCustomer) {
-					throw new Error('Could not update customer');
+					throw new Error('Could not update customer first name');
 				}
 
 				return updatedCustomer;
 			} catch (err: any) {
-				throw new Error('Error in updating customer: ' + err.message);
+				throw new Error('Error in updating customer first name: ' + err.message);
+			}
+		},
+		updateCustomerLastName: async (_: {}, args: any, __: any) => {
+			const { customerId, lastName } = args.input;
+			if (!customerId || !lastName) {
+				throw new Error('customerId and lastName fields must be filled to update customer last name');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { lastName }, { new: true });
+
+				if (!updatedCustomer) {
+					throw new Error('Could not update customer last name');
+				}
+
+				return updatedCustomer;
+			} catch (err: any) {
+				throw new Error('Error in updating customer last name: ' + err.message);
+			}
+		},
+		updateCustomerBusinessName: async (_: {}, args: any, __: any) => {
+			const { customerId, businessName } = args.input;
+			if (!customerId || !businessName) {
+				throw new Error('customerId and businessName fields must be filled to update customer business name');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { businessName }, { new: true });
+
+				if (!updatedCustomer) {
+					throw new Error('Could not update customer business name');
+				}
+
+				return updatedCustomer;
+			} catch (err: any) {
+				throw new Error('Error in updating customer business name: ' + err.message);
 			}
 		},
 		deleteCustomer: async (_: {}, args: any, __: any) => {
@@ -327,36 +467,366 @@ const resolvers = {
 				throw new Error('Error in creating property: ' + err.message);
 			}
 		},
-		updateProperty: async (_: {}, args: any, __: any) => {
-			const { propertyId, property } = args.input;
-			if (!propertyId || !property) {
-				throw new Error('No property object was presented for updating property');
+		updatePropertyDescription: async (_: {}, args: any, __: any) => {
+			const { propertyId, propertyDescription } = args.input;
+			if (!propertyId || !propertyDescription) {
+				throw new Error('propertyId and propertyDescription fields must be filled to update property description');
 			}
 
 			try {
 				await connectToDb();
 
-				const updatedProperty = await Property.findOneAndUpdate({ _id: propertyId }, property
-	
-		deleteS3Objects: async (_: {}, args: any, __: any) => {
-			const { imgKeys } = args?.input;
-			if (!imgKeys || imgKeys.length === 0) {
-				throw new Error('No key was presented for deleting object');
-			}
-			try {
-				await connectToDb();
+				const updatedProperty = await Property.findOneAndUpdate({ _id: propertyId }, { propertyDescription }, { new: true });
 
-				const response = await deleteS3Objects(imgKeys);
-
-				if (!response) {
-					throw new Error('Could not delete object from s3');
+				if (!updatedProperty) {
+					throw new Error('Could not update property description');
 				}
-				return response;
+
+				return updatedProperty;
 			} catch (err: any) {
-				throw new Error('Error in deleting object from s3: ' + err.message);
+				throw new Error('Error in updating property description: ' + err.message);
 			}
 		},
+		updatePropertyAddress: async (_: {}, args: any, __: any) => {
+			const { propertyId, propertyAddress } = args.input;
+			if (!propertyId || !propertyAddress) {
+				throw new Error('propertyId and propertyAddress fields must be filled to update property address');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedProperty = await Property.findOneAndUpdate({ _id: propertyId }, { propertyAddress }, { new: true });
+
+				if (!updatedProperty) {
+					throw new Error('Could not update property address');
+				}
+
+				return updatedProperty;
+			} catch (err: any) {
+				throw new Error('Error in updating property address: ' + err.message);
+			}
+		},
+		updatePropertyAgent: async (_: {}, args: any, __: any) => {
+			const { propertyId, agent } = args.input;
+			if (!propertyId || !agent) {
+				throw new Error('propertyId and agent fields must be filled to update property agent');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedProperty = await Property.findOneAndUpdate({ _id: propertyId }, { agent }, { new: true });
+
+				if (!updatedProperty) {
+					throw new Error('Could not update property agent');
+				}
+
+				return updatedProperty;
+			} catch (err: any) {
+				throw new Error('Error in updating property agent: ' + err.message);
+			}
+		},
+		updatePropertyS3FolderKey: async (_: {}, args: any, __: any) => {
+			const { propertyId, s3FolderKey } = args.input;
+			if (!propertyId || !s3FolderKey) {
+				throw new Error('propertyId and s3FolderKey fields must be filled to update property s3FolderKey');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedProperty = await Property.findOneAndUpdate({ _id: propertyId }, { s3FolderKey }, { new: true });
+
+				if (!updatedProperty) {
+					throw new Error('Could not update property s3FolderKey');
+				}
+
+				return updatedProperty;
+			} catch (err: any) {
+				throw new Error('Error in updating property s3FolderKey: ' + err.message);
+			}
+		},
+		createWorkOrder: async (_: {}, args: any, __: any) => {
+			const { workOrder } = args.input;
+			if (!workOrder) {
+				throw new Error('No work order object was presented for creating work order');
+			}
+
+			try {
+				await connectToDb();
+
+				const newWorkOrder = await WorkOrder.create(workOrder);
+
+				if (!newWorkOrder) {
+					throw new Error('Could not create work order');
+				}
+
+				return newWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in creating work order: ' + err.message);
+			}
+		},
+		updateWorkOrderDate: async (_: {}, args: any, __: any) => {
+			const { workOrderId, date } = args.input;
+			if (!workOrderId || !date) {
+				throw new Error('workOrderId and date fields must be filled to update work order date');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { date }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order date');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order date: ' + err.message);
+			}
+		},
+		updateWorkOrderCustomerId: async (_: {}, args: any, __: any) => {
+			const { workOrderId, customerId } = args.input;
+			if (!workOrderId || !customerId) {
+				throw new Error('workOrderId and customerId fields must be filled to update work order customer ID');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { customerId }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order customer ID');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order customer ID: ' + err.message);
+			}
+		},
+		updateWorkOrderPropertyId: async (_: {}, args: any, __: any) => {
+			const { workOrderId, propertyId } = args.input;
+			if (!workOrderId || !propertyId) {
+				throw new Error('workOrderId and propertyId fields must be filled to update work order property ID');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { propertyId }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order property ID');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order property ID: ' + err.message);
+			}
+		},
+		updateWorkOrderType: async (_: {}, args: any, __: any) => {
+			const { workOrderId, type } = args.input;
+			if (!workOrderId || !type) {
+				throw new Error('workOrderId and type fields must be filled to update work order type');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { type }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order type');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order type: ' + err.message);
+			}
+		},
+		updateWorkOrderDescription: async (_: {}, args: any, __: any) => {
+			const { workOrderId, description } = args.input;
+			if (!workOrderId || !description) {
+				throw new Error('workOrderId and description fields must be filled to update work order description');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { description }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order description');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order description: ' + err.message);
+			}
+		},
+		updateWorkOrderCompletedBy: async (_: {}, args: any, __: any) => {
+			const { workOrderId, completedBy } = args.input;
+			if (!workOrderId || !completedBy) {
+				throw new Error('workOrderId and completedBy fields must be filled to update work order completed by');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { completedBy }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order completed by');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order completed by: ' + err.message);
+			}
+		},
+		updateWorkOrderQuote: async (_: {}, args: any, __: any) => {
+			const { workOrderId, quote } = args.input;
+			if (!workOrderId || !quote) {
+				throw new Error('workOrderId and quote fields must be filled to update work order quote');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { quote }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order quote');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order quote: ' + err.message);
+			}
+		},
+		updateWorkOrderTotal: async (_: {}, args: any, __: any) => {
+			const { workOrderId, total } = args.input;
+			if (!workOrderId || !total) {
+				throw new Error('workOrderId and total fields must be filled to update work order total');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { total }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order total');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order total: ' + err.message);
+			}
+		},
+		updateWorkOrderCharged: async (_: {}, args: any, __: any) => {
+			const { workOrderId, charged } = args.input;
+			if (!workOrderId || charged === undefined) {
+				throw new Error('workOrderId and charged fields must be filled to update work order charged');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { charged }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order charged');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order charged: ' + err.message);
+			}
+		},
+		updateWorkOrderPaid: async (_: {}, args: any, __: any) => {
+			const { workOrderId, paid } = args.input;
+			if (!workOrderId || paid === undefined) {
+				throw new Error('workOrderId and paid fields must be filled to update work order paid');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { paid }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order paid');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order paid: ' + err.message);
+			}
+		},
+		updateWorkOrderComments: async (_: {}, args: any, __: any) => {
+			const { workOrderId, comments } = args.input;
+			if (!workOrderId || !comments) {
+				throw new Error('workOrderId and comments fields must be filled to update work order comments');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { comments }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order comments');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order comments: ' + err.message);
+			}
+		},
+		deleteWorkOrder: async (_: {}, args: any, __: any) => {
+			const { workOrderId } = args.input;
+			if (!workOrderId) {
+				throw new Error('No work order ID was presented for deleting work order');
+			}
+
+			try {
+				await connectToDb();
+
+				const deletedWorkOrder = await WorkOrder.findOneAndDelete({ _id: workOrderId });
+
+				if (!deletedWorkOrder) {
+					throw new Error('Could not delete work order');
+				}
+
+				return deletedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in deleting work order: ' + err.message);
+			}
+		},
+		// deleteS3Objects: async (_: {}, args: any, __: any) => {
+		// 	const { imgKeys } = args?.input;
+		// 	if (!imgKeys || imgKeys.length === 0) {
+		// 		throw new Error('No key was presented for deleting object');
+		// 	}
+		// 	try {
+		// 		await connectToDb();
+
+		// 		const response = await deleteS3Objects(imgKeys);
+
+		// 		if (!response) {
+		// 			throw new Error('Could not delete object from s3');
+		// 		}
+		// 		return response;
+		// 	} catch (err: any) {
+		// 		throw new Error('Error in deleting object from s3: ' + err.message);
+		// 	}
+		// },
 	},
+
 };
 
 export default resolvers;
