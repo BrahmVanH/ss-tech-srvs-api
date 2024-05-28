@@ -1,7 +1,7 @@
 {
-	"name": "lambda_function",
+	"name": "south-shore-technical-services-api",
 	"version": "1.0.0",
-	"description": "Lambda function for Captains Lakefront Rentals Website. To replace server-based API",
+	"description": "Lambda function for South Shore Technical Services",
 	"main": "index.ts",
 	"scripts": {
 		"start": "nodemon",

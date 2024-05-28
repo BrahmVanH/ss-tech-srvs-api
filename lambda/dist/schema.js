@@ -1,3 +1,7 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const typeDefs = `#graphql
+
 
 # AWS S3 Types
 
@@ -386,3 +390,8 @@ type Mutation {
 	# S3 Mutations
 
 	deleteS3Objects(input: DeleteS3ObjectInput!): DeleteS3ObjectResponse!
+}
+
+`;
+exports.default = typeDefs;
+//# sourceMappingURL=schema.js.map
