@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose';
+import { WorkOrder } from '../generated/graphql';
 
-const workOrderSchema: Schema = new Schema({
+const workOrderSchema: Schema<WorkOrder> = new Schema<WorkOrder>({
 	date: {
 		type: String,
 		required: true,
@@ -49,6 +50,6 @@ const workOrderSchema: Schema = new Schema({
 	},
 });
 
-const WorkOrder = model('WordOrder', workOrderSchema);
+const WorkOrder = model<WorkOrder>('WordOrder', workOrderSchema);
 
 export default WorkOrder;

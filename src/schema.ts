@@ -62,10 +62,12 @@ input UpdateUserUsernameInput {
 input UpdateUserPasswordInput {
 	userId: ID!
 	userPassword: String!
+	newPassword: String!
 }
 
 input UpdateUserPinInput {
 	userId: ID!
+	userPassword: String!
 	pin: String!
 }
 
@@ -104,12 +106,12 @@ input createCustomerInput {
 
 input UpdateCustomerFirstNameInput {
 	customerId: ID!
-	agentFirstName: String!
+	firstName: String!
 }
 
 input UpdateCustomerLastNameInput {
 	customerId: ID!
-	agentLastName: String!
+	lastName: String!
 }
 
 input UpdateCustomerBusinessNameInput {
@@ -135,6 +137,15 @@ type Address {
 
 }
 
+input AddressInput {
+	street: String!
+	unit: String!
+	city: String!
+	state: String!
+	zip: String!
+	country: String!
+}
+
 # Property & CRUD Types
 
 type Property {
@@ -148,7 +159,7 @@ type Property {
 
 input NewPropertyInput {
 	propertyName: String!
-	propertyAddress: Address!
+	propertyAddress: AddressInput!
 	propertyDescription: String!
 	agent: ID!
 }
@@ -169,7 +180,7 @@ input updatePropertyDescriptionInput {
 
 input updatePropertyAddressInput {
 	propertyId: ID!
-	propertyAddress: Address!
+	propertyAddress: AddressInput!
 }
 
 input updatePropertyAgentInput {
@@ -193,8 +204,8 @@ input RemovePropertyInput {
 type WorkOrder {
 	_id: ID!
 	date: String!
-	customerId: ID!
-	propertyId: ID! 
+	customerId: Customer!
+	propertyId: Property! 
 	type: String!
 	description: String!
 	completedBy: String!
@@ -372,7 +383,7 @@ type Mutation {
 	updateWorkOrderCharged(input: updateWorkOrderChargedInput!): WorkOrder!
 	updateWorkOrderPaid(input: updateWorkOrderPaidInput!): WorkOrder!
 	updateWorkOrderComments(input: updateWorkOrderCommentsInput!): WorkOrder!
-	deleteWorkOrder(input: RemoveWorkOrderInput!): RemoveWorkOrderResponse!
+	deleteWorkOrder(input: RemoveWorkOrderInput!): WorkOrder!
 
 	# S3 Mutations
 

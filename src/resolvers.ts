@@ -1,11 +1,45 @@
-import {  User, Customer, Property, WorkOrder } from './models';
+import { User, Customer, Property, WorkOrder } from './models';
 import { connectToDb } from './connection/db';
 import { signToken } from './utils/auth';
+import {
+	MutationCreateUserArgs,
+	Resolvers,
+	User as IUser,
+	MutationUpdateUserFirstNameArgs,
+	MutationUpdateUserLastNameArgs,
+	MutationUpdateUserUsernameArgs,
+	MutationUpdateUserPasswordArgs,
+	MutationUpdateUserPinArgs,
+	MutationCreateCustomerArgs,
+	MutationUpdateCustomerFirstNameArgs,
+	MutationUpdateCustomerLastNameArgs,
+	MutationUpdateCustomerBusinessNameArgs,
+	MutationDeleteCustomerArgs,
+	MutationCreatePropertyArgs,
+	MutationUpdatePropertyDescriptionArgs,
+	MutationUpdatePropertyAddressArgs,
+	MutationUpdatePropertyAgentArgs,
+	MutationUpdatePropertyS3FolderKeyArgs,
+	MutationCreateWorkOrderArgs,
+	MutationUpdateWorkOrderDateArgs,
+	MutationUpdateWorkOrderCustomerIdArgs,
+	MutationUpdateWorkOrderPropertyIdArgs,
+	MutationUpdateWorkOrderTypeArgs,
+	MutationUpdateWorkOrderDescriptionArgs,
+	MutationUpdateWorkOrderCompletedByArgs,
+	MutationUpdateWorkOrderQuoteArgs,
+	MutationUpdateWorkOrderTotalArgs,
+	MutationUpdateWorkOrderChargedArgs,
+	MutationUpdateWorkOrderPaidArgs,
+	MutationUpdateWorkOrderCommentsArgs,
+} from './generated/graphql';
+import { hash } from 'bcryptjs';
+import { comparePassword, hashPassword } from './utils/helpers';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
 
-const resolvers: any = {
+const resolvers: Resolvers = {
 	Query: {
 		getAllUsers: async () => {
 			try {
@@ -111,7 +145,7 @@ const resolvers: any = {
 				throw new Error('Error in finding work orders: ' + err.message);
 			}
 		},
-		queryWorkOrderByProperty: async (_: {}, { propertyId }: { propertyId: string }, __: any) => {
+		queryWorkOrdersByProperty: async (_: {}, { propertyId }: { propertyId: string }, __: any) => {
 			try {
 				await connectToDb();
 
@@ -131,7 +165,7 @@ const resolvers: any = {
 				throw new Error('Error in finding work orders: ' + err.message);
 			}
 		},
-		queryWorkOrderByCustomer: async (_: {}, { customerId }: { customerId: string }, __: any) => {
+		queryWorkOrdersByCustomer: async (_: {}, { customerId }: { customerId: string }, __: any) => {
 			try {
 				await connectToDb();
 
@@ -151,6 +185,26 @@ const resolvers: any = {
 				throw new Error('Error in finding work orders: ' + err.message);
 			}
 		},
+		queryWorkOrderById: async (_: {}, { workOrderId }: { workOrderId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!workOrderId) {
+					throw new Error('No work order ID was presented for querying work order');
+				}
+
+				const workOrder = await WorkOrder.findOne({ _id: workOrderId });
+
+				if (!workOrder) {
+					throw new Error('Cannot find work order in database');
+				}
+
+				return workOrder;
+			} catch (err: any) {
+				console.error({ message: 'error in finding work order', details: err });
+				throw new Error('Error in finding work order: ' + err.message);
+			}
+		},
 		// getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
 		// 	try {
 		// 		const preSignedUrl = await getPresignedUrl(imgKey, commandType, altTag);
@@ -165,7 +219,7 @@ const resolvers: any = {
 		// },
 	},
 	Mutation: {
-		createUser: async (_: {}, args: any, __: any) => {
+		createUser: async (_: {}, args: MutationCreateUserArgs, __: any) => {
 			const { firstName, lastName, username, userPassword, adminCode } = args.input;
 
 			if (!firstName || !lastName || !username || !userPassword || !adminCode) {
@@ -174,6 +228,8 @@ const resolvers: any = {
 				throw new Error('Incorrect admin code');
 			}
 
+			const hashedPassword = await hashPassword(userPassword);
+
 			try {
 				await connectToDb();
 
@@ -181,7 +237,7 @@ const resolvers: any = {
 					firstName,
 					lastName,
 					username,
-					password: userPassword,
+					password: hashedPassword,
 				});
 
 				if (!user) {
@@ -195,7 +251,7 @@ const resolvers: any = {
 				throw new Error('Error in creating user: ' + err.message);
 			}
 		},
-		updateUserFirstName: async (_: {}, args: any, __: any) => {
+		updateUserFirstName: async (_: {}, args: MutationUpdateUserFirstNameArgs, __: any) => {
 			const { userId, firstName } = args.input;
 			if (!userId || !firstName) {
 				throw new Error('userId and firstName fields must be filled to update user first name');
@@ -210,12 +266,13 @@ const resolvers: any = {
 					throw new Error('Could not update user first name');
 				}
 
-				return updatedUser;
+				const token = signToken(updatedUser);
+				return { token, user: updatedUser };
 			} catch (err: any) {
 				throw new Error('Error in updating user first name: ' + err.message);
 			}
 		},
-		updateUserLastName: async (_: {}, args: any, __: any) => {
+		updateUserLastName: async (_: {}, args: MutationUpdateUserLastNameArgs, __: any) => {
 			const { userId, lastName } = args.input;
 			if (!userId || !lastName) {
 				throw new Error('userId and lastName fields must be filled to update user last name');
@@ -230,12 +287,14 @@ const resolvers: any = {
 					throw new Error('Could not update user last name');
 				}
 
-				return updatedUser;
+				const token = signToken(updatedUser);
+
+				return { token, user: updatedUser };
 			} catch (err: any) {
 				throw new Error('Error in updating user last name: ' + err.message);
 			}
 		},
-		updateUserUsername: async (_: {}, args: any, __: any) => {
+		updateUserUsername: async (_: {}, args: MutationUpdateUserUsernameArgs, __: any) => {
 			const { userId, username } = args.input;
 			if (!userId || !username) {
 				throw new Error('userId and username fields must be filled to update user username');
@@ -250,19 +309,33 @@ const resolvers: any = {
 					throw new Error('Could not update user username');
 				}
 
-				return updatedUser;
+				const token = signToken(updatedUser);
+
+				return { token, user: updatedUser };
 			} catch (err: any) {
 				throw new Error('Error in updating user username: ' + err.message);
 			}
 		},
-		updateUserPassword: async (_: {}, args: any, __: any) => {
-			const { userId, userPassword } = args.input;
-			if (!userId || !userPassword) {
+		updateUserPassword: async (_: {}, args: MutationUpdateUserPasswordArgs, __: any) => {
+			const { userId, userPassword, newPassword } = args.input;
+			if (!userId || !userPassword || !newPassword) {
 				throw new Error('userId and userPassword fields must be filled to update user password');
 			}
 
 			try {
 				await connectToDb();
+
+				const user = await User.findOne({ _id: userId });
+
+				if (!user) {
+					throw new Error('Could not find user');
+				}
+
+				const existingPasswordIsCorrect = await comparePassword(userPassword, userPassword);
+
+				if (!existingPasswordIsCorrect) {
+					throw new Error('Incorrect password');
+				}
 
 				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { password: userPassword }, { new: true });
 
@@ -270,48 +343,66 @@ const resolvers: any = {
 					throw new Error('Could not update user password');
 				}
 
-				return updatedUser;
+				const token = signToken(updatedUser);
+
+				return { token, user: updatedUser };
 			} catch (err: any) {
 				throw new Error('Error in updating user password: ' + err.message);
 			}
 		},
-		updateUserPin: async (_: {}, args: any, __: any) => {
-			const { userId, pin } = args.input;
-			if (!userId || !pin) {
-				throw new Error('userId and pin fields must be filled to update user pin');
+		updateUserPin: async (_: {}, args: MutationUpdateUserPinArgs, __: any) => {
+			const { userId, pin, userPassword } = args.input;
+			if (!userId || !pin || !userPassword) {
+				throw new Error('userId, pin, and password fields must be filled to update user pin');
 			}
 
 			try {
 				await connectToDb();
+
+				const user = await User.findOne({ _id: userId });
+
+				if (!user) {
+					throw new Error('Could not find user');
+				}
+
+				const existingPasswordIsCorrect = await comparePassword(userPassword, userPassword);
+
+				if (!existingPasswordIsCorrect) {
+					throw new Error('Incorrect password');
+				}
 
 				const updatedUser = await User.findOneAndUpdate({ _id: userId }, { pin }, { new: true });
 
 				if (!updatedUser) {
 					throw new Error('Could not update user pin');
 				}
+				const token = signToken(updatedUser);
 
-				return updatedUser;
+				return { token, user: updatedUser };
 			} catch (err: any) {
 				throw new Error('Error in updating user pin: ' + err.message);
 			}
 		},
 		loginUser: async (_: {}, args: any, __: any) => {
+			const { username, userPassword } = args.input;
+
 			try {
-				const { username, userPassword } = args.input;
 				await connectToDb();
+
 				if (!username || !userPassword) {
 					throw new Error('username and password fields must be filled to log in');
 				}
 
 				const user = await User.findOne({ username });
-				if (!user?.comparePassword) {
-					throw new Error("Can't find user with that username");
+
+				if (!user) {
+					throw new Error('Could not find user');
 				}
 
-				const isPasswordValid = await user.comparePassword(userPassword);
+				const existingPasswordIsCorrect = await comparePassword(userPassword, userPassword);
 
-				if (!isPasswordValid) {
-					throw new Error('Incorrect Password!');
+				if (!existingPasswordIsCorrect) {
+					throw new Error('Incorrect password');
 				}
 
 				const token = signToken(user);
@@ -321,8 +412,9 @@ const resolvers: any = {
 			}
 		},
 		removeUser: async (_: {}, args: any, __: any) => {
+			const { username, userPassword } = args.input;
+
 			try {
-				const { username, userPassword } = args.input;
 				await connectToDb();
 				if (!username) {
 					throw new Error('username  fields must be filled to remove');
@@ -330,24 +422,29 @@ const resolvers: any = {
 
 				const user = await User.findOne({ username });
 
-				if (!user?.comparePassword) {
-					throw new Error("Can't find user with that username");
+				if (!user) {
+					throw new Error('Could not find user');
 				}
 
-				const isPasswordValid = await user.comparePassword(userPassword);
-				if (!isPasswordValid) {
-					throw new Error('Incorrect Password!');
+				const existingPasswordIsCorrect = await comparePassword(userPassword, userPassword);
+
+				if (!existingPasswordIsCorrect) {
+					throw new Error('Incorrect password');
 				}
+
 				const deletedUser = await User.findOneAndDelete({ username });
 				if (!deletedUser) {
 					throw new Error('Could not delete user');
 				}
-				return { token: '', user: deletedUser };
+
+				const token = signToken(deletedUser);
+
+				return { token, user: deletedUser };
 			} catch (err: any) {
 				throw new Error('Error in removing in user: ' + err.message);
 			}
 		},
-		createCustomer: async (_: {}, args: any, __: any) => {
+		createCustomer: async (_: {}, args: MutationCreateCustomerArgs, __: any) => {
 			const { customer } = args.input;
 			if (!customer) {
 				throw new Error('No customer object was presented for creating customer');
@@ -367,7 +464,7 @@ const resolvers: any = {
 				throw new Error('Error in creating customer: ' + err.message);
 			}
 		},
-		updateCustomerFirstName: async (_: {}, args: any, __: any) => {
+		updateCustomerFirstName: async (_: {}, args: MutationUpdateCustomerFirstNameArgs, __: any) => {
 			const { customerId, firstName } = args.input;
 			if (!customerId || !firstName) {
 				throw new Error('customerId and firstName fields must be filled to update customer first name');
@@ -387,7 +484,7 @@ const resolvers: any = {
 				throw new Error('Error in updating customer first name: ' + err.message);
 			}
 		},
-		updateCustomerLastName: async (_: {}, args: any, __: any) => {
+		updateCustomerLastName: async (_: {}, args: MutationUpdateCustomerLastNameArgs, __: any) => {
 			const { customerId, lastName } = args.input;
 			if (!customerId || !lastName) {
 				throw new Error('customerId and lastName fields must be filled to update customer last name');
@@ -407,7 +504,7 @@ const resolvers: any = {
 				throw new Error('Error in updating customer last name: ' + err.message);
 			}
 		},
-		updateCustomerBusinessName: async (_: {}, args: any, __: any) => {
+		updateCustomerBusinessName: async (_: {}, args: MutationUpdateCustomerBusinessNameArgs, __: any) => {
 			const { customerId, businessName } = args.input;
 			if (!customerId || !businessName) {
 				throw new Error('customerId and businessName fields must be filled to update customer business name');
@@ -427,7 +524,7 @@ const resolvers: any = {
 				throw new Error('Error in updating customer business name: ' + err.message);
 			}
 		},
-		deleteCustomer: async (_: {}, args: any, __: any) => {
+		deleteCustomer: async (_: {}, args: MutationDeleteCustomerArgs, __: any) => {
 			const { customerId } = args.input;
 			if (!customerId) {
 				throw new Error('No customer ID was presented for deleting customer');
@@ -447,7 +544,7 @@ const resolvers: any = {
 				throw new Error('Error in deleting customer: ' + err.message);
 			}
 		},
-		createProperty: async (_: {}, args: any, __: any) => {
+		createProperty: async (_: {}, args: MutationCreatePropertyArgs, __: any) => {
 			const { property } = args.input;
 			if (!property) {
 				throw new Error('No property object was presented for creating property');
@@ -467,7 +564,7 @@ const resolvers: any = {
 				throw new Error('Error in creating property: ' + err.message);
 			}
 		},
-		updatePropertyDescription: async (_: {}, args: any, __: any) => {
+		updatePropertyDescription: async (_: {}, args: MutationUpdatePropertyDescriptionArgs, __: any) => {
 			const { propertyId, propertyDescription } = args.input;
 			if (!propertyId || !propertyDescription) {
 				throw new Error('propertyId and propertyDescription fields must be filled to update property description');
@@ -487,7 +584,7 @@ const resolvers: any = {
 				throw new Error('Error in updating property description: ' + err.message);
 			}
 		},
-		updatePropertyAddress: async (_: {}, args: any, __: any) => {
+		updatePropertyAddress: async (_: {}, args: MutationUpdatePropertyAddressArgs, __: any) => {
 			const { propertyId, propertyAddress } = args.input;
 			if (!propertyId || !propertyAddress) {
 				throw new Error('propertyId and propertyAddress fields must be filled to update property address');
@@ -507,7 +604,7 @@ const resolvers: any = {
 				throw new Error('Error in updating property address: ' + err.message);
 			}
 		},
-		updatePropertyAgent: async (_: {}, args: any, __: any) => {
+		updatePropertyAgent: async (_: {}, args: MutationUpdatePropertyAgentArgs, __: any) => {
 			const { propertyId, agent } = args.input;
 			if (!propertyId || !agent) {
 				throw new Error('propertyId and agent fields must be filled to update property agent');
@@ -527,7 +624,7 @@ const resolvers: any = {
 				throw new Error('Error in updating property agent: ' + err.message);
 			}
 		},
-		updatePropertyS3FolderKey: async (_: {}, args: any, __: any) => {
+		updatePropertyS3FolderKey: async (_: {}, args: MutationUpdatePropertyS3FolderKeyArgs, __: any) => {
 			const { propertyId, s3FolderKey } = args.input;
 			if (!propertyId || !s3FolderKey) {
 				throw new Error('propertyId and s3FolderKey fields must be filled to update property s3FolderKey');
@@ -547,7 +644,7 @@ const resolvers: any = {
 				throw new Error('Error in updating property s3FolderKey: ' + err.message);
 			}
 		},
-		createWorkOrder: async (_: {}, args: any, __: any) => {
+		createWorkOrder: async (_: {}, args: MutationCreateWorkOrderArgs, __: any) => {
 			const { workOrder } = args.input;
 			if (!workOrder) {
 				throw new Error('No work order object was presented for creating work order');
@@ -567,7 +664,7 @@ const resolvers: any = {
 				throw new Error('Error in creating work order: ' + err.message);
 			}
 		},
-		updateWorkOrderDate: async (_: {}, args: any, __: any) => {
+		updateWorkOrderDate: async (_: {}, args: MutationUpdateWorkOrderDateArgs, __: any) => {
 			const { workOrderId, date } = args.input;
 			if (!workOrderId || !date) {
 				throw new Error('workOrderId and date fields must be filled to update work order date');
@@ -587,7 +684,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order date: ' + err.message);
 			}
 		},
-		updateWorkOrderCustomerId: async (_: {}, args: any, __: any) => {
+		updateWorkOrderCustomerId: async (_: {}, args: MutationUpdateWorkOrderCustomerIdArgs, __: any) => {
 			const { workOrderId, customerId } = args.input;
 			if (!workOrderId || !customerId) {
 				throw new Error('workOrderId and customerId fields must be filled to update work order customer ID');
@@ -607,7 +704,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order customer ID: ' + err.message);
 			}
 		},
-		updateWorkOrderPropertyId: async (_: {}, args: any, __: any) => {
+		updateWorkOrderPropertyId: async (_: {}, args: MutationUpdateWorkOrderPropertyIdArgs, __: any) => {
 			const { workOrderId, propertyId } = args.input;
 			if (!workOrderId || !propertyId) {
 				throw new Error('workOrderId and propertyId fields must be filled to update work order property ID');
@@ -627,7 +724,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order property ID: ' + err.message);
 			}
 		},
-		updateWorkOrderType: async (_: {}, args: any, __: any) => {
+		updateWorkOrderType: async (_: {}, args: MutationUpdateWorkOrderTypeArgs, __: any) => {
 			const { workOrderId, type } = args.input;
 			if (!workOrderId || !type) {
 				throw new Error('workOrderId and type fields must be filled to update work order type');
@@ -647,7 +744,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order type: ' + err.message);
 			}
 		},
-		updateWorkOrderDescription: async (_: {}, args: any, __: any) => {
+		updateWorkOrderDescription: async (_: {}, args: MutationUpdateWorkOrderDescriptionArgs, __: any) => {
 			const { workOrderId, description } = args.input;
 			if (!workOrderId || !description) {
 				throw new Error('workOrderId and description fields must be filled to update work order description');
@@ -667,7 +764,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order description: ' + err.message);
 			}
 		},
-		updateWorkOrderCompletedBy: async (_: {}, args: any, __: any) => {
+		updateWorkOrderCompletedBy: async (_: {}, args: MutationUpdateWorkOrderCompletedByArgs, __: any) => {
 			const { workOrderId, completedBy } = args.input;
 			if (!workOrderId || !completedBy) {
 				throw new Error('workOrderId and completedBy fields must be filled to update work order completed by');
@@ -687,7 +784,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order completed by: ' + err.message);
 			}
 		},
-		updateWorkOrderQuote: async (_: {}, args: any, __: any) => {
+		updateWorkOrderQuote: async (_: {}, args: MutationUpdateWorkOrderQuoteArgs, __: any) => {
 			const { workOrderId, quote } = args.input;
 			if (!workOrderId || !quote) {
 				throw new Error('workOrderId and quote fields must be filled to update work order quote');
@@ -707,7 +804,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order quote: ' + err.message);
 			}
 		},
-		updateWorkOrderTotal: async (_: {}, args: any, __: any) => {
+		updateWorkOrderTotal: async (_: {}, args: MutationUpdateWorkOrderTotalArgs, __: any) => {
 			const { workOrderId, total } = args.input;
 			if (!workOrderId || !total) {
 				throw new Error('workOrderId and total fields must be filled to update work order total');
@@ -727,7 +824,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order total: ' + err.message);
 			}
 		},
-		updateWorkOrderCharged: async (_: {}, args: any, __: any) => {
+		updateWorkOrderCharged: async (_: {}, args: MutationUpdateWorkOrderChargedArgs, __: any) => {
 			const { workOrderId, charged } = args.input;
 			if (!workOrderId || charged === undefined) {
 				throw new Error('workOrderId and charged fields must be filled to update work order charged');
@@ -747,7 +844,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order charged: ' + err.message);
 			}
 		},
-		updateWorkOrderPaid: async (_: {}, args: any, __: any) => {
+		updateWorkOrderPaid: async (_: {}, args: MutationUpdateWorkOrderPaidArgs, __: any) => {
 			const { workOrderId, paid } = args.input;
 			if (!workOrderId || paid === undefined) {
 				throw new Error('workOrderId and paid fields must be filled to update work order paid');
@@ -767,7 +864,7 @@ const resolvers: any = {
 				throw new Error('Error in updating work order paid: ' + err.message);
 			}
 		},
-		updateWorkOrderComments: async (_: {}, args: any, __: any) => {
+		updateWorkOrderComments: async (_: {}, args: MutationUpdateWorkOrderCommentsArgs, __: any) => {
 			const { workOrderId, comments } = args.input;
 			if (!workOrderId || !comments) {
 				throw new Error('workOrderId and comments fields must be filled to update work order comments');
@@ -826,7 +923,6 @@ const resolvers: any = {
 		// 	}
 		// },
 	},
-
 };
 
 export default resolvers;

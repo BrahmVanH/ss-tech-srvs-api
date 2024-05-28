@@ -1,8 +1,9 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import { IUser } from '../types.d';
+import { User } from '../generated/graphql';
 
-export const signToken = ({ username, _id }: IUser) => {
+export const signToken = ({ username, _id }: User) => {
 	const expiration = process.env.AUTH_EXPIRATION ?? '';
 	const secret: jwt.Secret = process.env.AUTH_SECRET ?? '';
 

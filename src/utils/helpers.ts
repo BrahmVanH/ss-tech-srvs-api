@@ -1,5 +1,19 @@
 import { ImageObject } from '../generated/graphql';
 import { IGalleryContent } from '../types';
+import bcrypt from 'bcryptjs';
+
+
+// Hashes password for new user
+
+export const hashPassword = async (password: string) => {
+	return bcrypt.hash(password, 8);
+}
+
+// Decrypts password for user login
+
+export const comparePassword = async (enteredPassword: string, userPassword: string) => {
+	return bcrypt.compare(enteredPassword, userPassword);
+}
 
 // Takes in alt tags, gallery image urls and header url from property pages and
 // formats an array for image gallery in client

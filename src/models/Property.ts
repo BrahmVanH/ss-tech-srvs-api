@@ -1,6 +1,7 @@
 import { model, Schema, Types } from 'mongoose';
+import { Address, Property } from '../generated/graphql';
 
-const AddressSchema: Schema = new Schema({
+const AddressSchema: Schema<Address> = new Schema<Address>({
 	street: {
 		type: String,
 		required: true,
@@ -22,7 +23,7 @@ const AddressSchema: Schema = new Schema({
 	},
 });
 
-const propertySchema: Schema = new Schema({
+const propertySchema: Schema<Property> = new Schema<Property>({
 	propertyName: {
 		type: String,
 		required: true,
@@ -30,7 +31,6 @@ const propertySchema: Schema = new Schema({
 	propertyAddress: {
 		type: AddressSchema,
 		required: true,
-
 	},
 	propertyDescription: {
 		type: String,
@@ -43,6 +43,6 @@ const propertySchema: Schema = new Schema({
 	},
 });
 
-const Property = model('Property', propertySchema);
+const Property = model<Property>('Property', propertySchema);
 
 export default Property;

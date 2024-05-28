@@ -1,25 +1,25 @@
 import { model, Schema } from 'mongoose';
+import { Customer } from '../generated/graphql';
 
-const customerSchema: Schema = new Schema({
-	agentFirstName: {
-    type: String,
-    required: true,
-  },
-	agentLastName: {
+const customerSchema: Schema<Customer> = new Schema<Customer>({
+	firstName: {
 		type: String,
 		required: true,
 	},
-  businessName: {
-    type: String,
-    required: true,
-  },
-  workOrders: {
-    type: Schema.Types.ObjectId,
-    required: false,
-  }
+	lastName: {
+		type: String,
+		required: true,
+	},
+	businessName: {
+		type: String,
+		required: true,
+	},
+	workOrders: {
+		type: Schema.Types.ObjectId,
+		required: false,
+	},
 });
 
-const Customer = model('Customer', customerSchema);
+const Customer = model<Customer>('Customer', customerSchema);
 
 export default Customer;
-

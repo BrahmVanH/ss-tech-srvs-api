@@ -1,7 +1,8 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { IUser } from '../types.d';
-const userSchema: Schema<IUser> = new Schema<IUser>(
+import { User } from '../generated/graphql';
+const userSchema: Schema<User> = new Schema<User>(
 	{
 		firstName: {
 			type: String,
@@ -21,25 +22,10 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
 			required: true,
 		},
 	},
-	{
-		toJSON: {
-			virtuals: true,
-		},
-	}
+
 );
 
-userSchema.pre('save', async function (next) {
-	const user = this;
-	if (user.isModified('password')) {
-		user.password = await bcrypt.hash(user.password, 8);
-	}
-	next();
-});
 
-userSchema.methods.comparePassword = async function (password: string) {
-	return bcrypt.compare(password, this.password);
-};
-
-const User = model<IUser>('User', userSchema);
+const User = model<User>('User', userSchema);
 
 export default User;
