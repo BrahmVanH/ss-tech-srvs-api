@@ -1,0 +1,31 @@
+import { Review } from '../../generated/graphql';
+import { extractThumbtackData } from './helper';
+
+import { PythonShell } from 'python-shell';
+import { execSync } from 'child_process';
+
+// Scrape thumbtack data
+// I wasn't able to get the timing right for getting the data, so I 
+// chose to just block the thread until the data is returned.
+const scrape = () => {
+
+	const scrapedData = execSync('python src/lib/thumbtack_scraper/thumbtack_scraper.py', { encoding: 'utf8' });
+  const jsonString = scrapedData.replace(/ '/g, ' "').replace(/' /g, '" ').replace(/{'/g, '{"').replace(/'}/g, '"}').replace(/':/g, '":').replace(/',/g, '",');
+	const reviewJson = JSON.parse(jsonString);
+
+	if (reviewJson.length === 0 || !reviewJson) {
+		console.log('reviewJson', reviewJson);
+		throw new Error('No data returned from scraper');
+	}
+
+	const reviews: Review[] = extractThumbtackData(reviewJson);
+
+  if (reviews.length === 0 || !reviews) {
+    throw new Error('No data returned from scraper');
+  }
+  console.log('reviews', reviews);
+
+  return reviews;
+};
+
+export default scrape;

@@ -20,6 +20,8 @@ input DeleteS3ObjectInput {
 	imgKeys: [String!]!
 }
 
+
+
 # User & CRUD Types
 
  type User {
@@ -401,7 +403,24 @@ input RemoveWorkOrderInput {
 	workOrderId: ID!
 }
 
+# Thumbtack Review Types 
 
+type ReviewAuthor {
+	name: String!
+}
+
+type ReviewRating {
+	
+	ratingValue: Int!
+}
+
+type Review {
+	
+	datePublished: String!
+	description: String!
+	author: ReviewAuthor!
+	reviewRating: ReviewRating!
+}
 
 # Queries
 
@@ -433,6 +452,9 @@ type Query {
 
 	# S3 Queries
 	getPresignedS3Url(imgKey: String!, commandType: String!, altTag: String!): String!
+
+	# Thumbtack Review Queries
+	queryThumbtackReviews: [Review!]
 
 }
 

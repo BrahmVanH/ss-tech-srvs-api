@@ -451,6 +451,7 @@ export type Query = {
   queryInvoicesByWorkOrder?: Maybe<Array<Invoice>>;
   queryProperties?: Maybe<Array<Property>>;
   queryPropertyById: Property;
+  queryThumbtackReviews?: Maybe<Array<Review>>;
   queryWorkOrderById: WorkOrder;
   queryWorkOrders?: Maybe<Array<WorkOrder>>;
   queryWorkOrdersByCustomer?: Maybe<Array<WorkOrder>>;
@@ -523,6 +524,24 @@ export type RemoveUserInput = {
 
 export type RemoveWorkOrderInput = {
   workOrderId: Scalars['ID']['input'];
+};
+
+export type Review = {
+  __typename?: 'Review';
+  author: ReviewAuthor;
+  datePublished: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  reviewRating: ReviewRating;
+};
+
+export type ReviewAuthor = {
+  __typename?: 'ReviewAuthor';
+  name: Scalars['String']['output'];
+};
+
+export type ReviewRating = {
+  __typename?: 'ReviewRating';
+  ratingValue: Scalars['Int']['output'];
 };
 
 export type UpdateCustomerBusinessNameInput = {
@@ -844,6 +863,9 @@ export type ResolversTypes = {
   RemovePropertyInput: RemovePropertyInput;
   RemoveUserInput: RemoveUserInput;
   RemoveWorkOrderInput: RemoveWorkOrderInput;
+  Review: ResolverTypeWrapper<Review>;
+  ReviewAuthor: ResolverTypeWrapper<ReviewAuthor>;
+  ReviewRating: ResolverTypeWrapper<ReviewRating>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   UpdateCustomerBusinessNameInput: UpdateCustomerBusinessNameInput;
   UpdateCustomerEmailInput: UpdateCustomerEmailInput;
@@ -917,6 +939,9 @@ export type ResolversParentTypes = {
   RemovePropertyInput: RemovePropertyInput;
   RemoveUserInput: RemoveUserInput;
   RemoveWorkOrderInput: RemoveWorkOrderInput;
+  Review: Review;
+  ReviewAuthor: ReviewAuthor;
+  ReviewRating: ReviewRating;
   String: Scalars['String']['output'];
   UpdateCustomerBusinessNameInput: UpdateCustomerBusinessNameInput;
   UpdateCustomerEmailInput: UpdateCustomerEmailInput;
@@ -1079,10 +1104,29 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   queryInvoicesByWorkOrder?: Resolver<Maybe<Array<ResolversTypes['Invoice']>>, ParentType, ContextType, RequireFields<QueryQueryInvoicesByWorkOrderArgs, 'workOrderId'>>;
   queryProperties?: Resolver<Maybe<Array<ResolversTypes['Property']>>, ParentType, ContextType>;
   queryPropertyById?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<QueryQueryPropertyByIdArgs, 'propertyId'>>;
+  queryThumbtackReviews?: Resolver<Maybe<Array<ResolversTypes['Review']>>, ParentType, ContextType>;
   queryWorkOrderById?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<QueryQueryWorkOrderByIdArgs, 'workOrderId'>>;
   queryWorkOrders?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType>;
   queryWorkOrdersByCustomer?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType, RequireFields<QueryQueryWorkOrdersByCustomerArgs, 'customerId'>>;
   queryWorkOrdersByProperty?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType, RequireFields<QueryQueryWorkOrdersByPropertyArgs, 'propertyId'>>;
+};
+
+export type ReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['Review'] = ResolversParentTypes['Review']> = {
+  author?: Resolver<ResolversTypes['ReviewAuthor'], ParentType, ContextType>;
+  datePublished?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  reviewRating?: Resolver<ResolversTypes['ReviewRating'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ReviewAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReviewAuthor'] = ResolversParentTypes['ReviewAuthor']> = {
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ReviewRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReviewRating'] = ResolversParentTypes['ReviewRating']> = {
+  ratingValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
@@ -1131,6 +1175,9 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Property?: PropertyResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Review?: ReviewResolvers<ContextType>;
+  ReviewAuthor?: ReviewAuthorResolvers<ContextType>;
+  ReviewRating?: ReviewRatingResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   WorkOrder?: WorkOrderResolvers<ContextType>;
   imageObject?: ImageObjectResolvers<ContextType>;

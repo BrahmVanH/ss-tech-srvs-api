@@ -44,10 +44,12 @@ import {
 	MutationDeletePropertyArgs,
 	MutationDeleteWorkOrderArgs,
 	MutationUpdateCustomerPropertiesArgs,
+	Review,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
 import Invoice from './models/Invoice';
+import scrape from './lib/thumbtack_scraper';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -146,7 +148,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const workOrders = await WorkOrder.find();
+				const workOrders = await WorkOrder.find().populate('invoices').populate('customerId').populate('propertyId');
 
 				if (!workOrders) {
 					throw new Error('Error fetching all work orders from database');
@@ -222,7 +224,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const invoices = await Invoice.find();
+				const invoices = await Invoice.find().populate('workOrders').populate('customerId');
 
 				if (!invoices) {
 					throw new Error('Error fetching all invoices from database');
@@ -294,6 +296,19 @@ const resolvers: Resolvers = {
 				throw new Error('Error in finding invoices: ' + err.message);
 			}
 		},
+		queryThumbtackReviews: async () => {
+			try {
+				const reviews = scrape();
+				if (reviews && reviews.length < 1) {
+					throw new Error('Error fetching reviews from Thumbtack');
+				}
+				return reviews;
+			} catch (err: any) {
+				console.error({ message: 'error in finding reviews', details: err });
+				throw new Error('Error in finding reviews: ' + err.message);
+			}
+		},
+
 		// getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
 		// 	try {
 		// 		const preSignedUrl = await getPresignedUrl(imgKey, commandType, altTag);
@@ -628,7 +643,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { properties: {$push: property} }, { new: true });
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { properties: { $push: property } }, { new: true });
 
 				if (!updatedCustomer) {
 					throw new Error('Could not update customer properties');
@@ -668,7 +683,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const newProperty = await Property.create({...property, s3FolderKey: property.s3FolderKey ?? ''});
+				const newProperty = await Property.create({ ...property, s3FolderKey: property.s3FolderKey ?? '' });
 
 				if (!newProperty) {
 					throw new Error('Could not create property');

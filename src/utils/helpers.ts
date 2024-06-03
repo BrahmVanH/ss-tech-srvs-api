@@ -1,6 +1,7 @@
 import { ImageObject } from '../generated/graphql';
 import { IGalleryContent } from '../types';
 import bcrypt from 'bcryptjs';
+import { spawn } from 'child_process';
 
 // Hashes password for new user
 
@@ -43,6 +44,7 @@ export const createImgGalArr = (galleryAltTags: string[], imageUrls: string[], i
 	// this one works
 	return galleryArray;
 };
+
 
 // Retrieves Home page image URLs from server-side S3 query
 
