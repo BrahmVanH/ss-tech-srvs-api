@@ -1,4 +1,4 @@
-service: captains-lakefront-rentals-api
+service: south-shore-mech-svcs-api
 
 provider:
   name: aws
