@@ -17,6 +17,8 @@ input DeleteS3ObjectInput {
 	imgKeys: [String!]!
 }
 
+
+
 # User & CRUD Types
 
  type User {
@@ -86,17 +88,19 @@ type Customer {
 	createdAt: String!
 	firstName: String!
 	lastName: String!
-	email: String
-	phone: Int!
+	email: String!
+	phone: String!
 	businessName: String!
-	workOrders: [WorkOrder]
+	workOrders: [WorkOrder]!
+	invoices: [Invoice]!
+	properties: [Property]!
 }
 
 input NewCustomerInput {
 	firstName: String!
 	lastName: String!
 	email: String
-	phone: Int!
+	phone: String!
 	businessName: String!
 }
 
@@ -122,19 +126,97 @@ input UpdateCustomerEmailInput {
 
 input UpdateCustomerPhoneInput {
 	customerId: ID!
-	phone: Int!
+	phone: String!
 }
 
-
+input UpdateCustomerInvoicesInput {
+	customerId: ID!
+	invoice: ID
+}
 
 input UpdateCustomerBusinessNameInput {
 	customerId: ID!
 	businessName: String!
 }
 
+input UpdateCustomerPropertiesInput {
+	customerId: ID!
+	property: ID
+}
+
 input RemoveCustomerInput {
 	customerId: ID!
 }
+
+# Invoices & CRUD Types
+
+type Invoice {
+	_id: ID!
+	invoiceNumber: String!
+	date: String!
+	customerId: Customer!
+	workOrders: [WorkOrder]!
+	quote: Float!
+	total: Float!
+	charged: Boolean!
+	paid: Boolean!
+}
+
+input NewInvoiceInput {
+	date: String!
+	invoiceNumber: String!
+	customerId: ID!
+	workOrders: [ID]
+	quote: Float
+	total: Float
+	charged: Boolean!
+	paid: Boolean!
+}
+
+input CreateInvoiceInput {
+	invoice: NewInvoiceInput!
+}
+
+input UpdateInvoiceDateInput {
+	invoiceId: ID!
+	date: String!
+}
+
+input UpdateInvoiceCustomerIdInput {
+	invoiceId: ID!
+	customerId: ID!
+}
+
+input UpdateInvoiceWorkOrdersInput {
+	invoiceId: ID!
+	workOrders: [ID!]!
+}
+
+input UpdateInvoiceTotalInput {
+	invoiceId: ID!
+	total: Float!
+}
+
+input UpdateInvoiceChargedInput {
+	invoiceId: ID!
+	charged: Boolean!
+}
+
+input UpdateInvoicePaidInput {
+	invoiceId: ID!
+	paid: Boolean!
+}
+
+input UpdateInvoiceQuoteInput {
+	invoiceId: ID!
+	quote: Float!
+}
+
+input RemoveInvoiceInput {
+	invoiceId: ID!
+}
+
+
 
 
 # Address & CRUD Type
@@ -166,7 +248,7 @@ type Property {
 	propertyName: String!
 	propertyAddress: Address!
 	propertyDescription: String!
-	agent: Customer
+	agent: Customer!
 	s3FolderKey: String! 
 }
 
@@ -175,6 +257,7 @@ input NewPropertyInput {
 	propertyAddress: AddressInput!
 	propertyDescription: String!
 	agent: ID!
+	s3FolderKey: String
 }
 
 input CreatePropertyInput {
@@ -217,16 +300,18 @@ input RemovePropertyInput {
 type WorkOrder {
 	_id: ID!
 	date: String!
-	customerId: Customer
-	propertyId: Property
+	lastUpdated: String!
+	customerId: Customer!
+	propertyId: Property!
+	invoices: [Invoice]!
 	type: String!
 	description: String!
 	completedBy: String!
-	quote: Float
-	total: Float
+	quote: Float!
+	total: Float!
 	charged: Boolean!
 	paid: Boolean!
-	comments: String
+	comments: String!
 	}
 
 
@@ -236,7 +321,7 @@ input NewWorkOrderInput {
 	propertyId: ID!
 	type: String!
 	description: String!
-	completedBy: String!
+	completedBy: String
 	quote: Float
 	total: Float
 	charged: Boolean!
@@ -247,20 +332,6 @@ input NewWorkOrderInput {
 
 input CreateWorkOrderInput {
 	workOrder: NewWorkOrderInput!
-}
-
-input UpdateWorkOrderInput {
-	date: String
-	customerId: ID 
-	propertyId: ID 
-	type: String 
-	description: String 
-	completedBy: String 
-	quote: Float
-	total: Float
-	charged: Boolean 
-	paid: Boolean 
-	comments: String
 }
 
 input UpdateWorkOrderDateInput {
@@ -276,6 +347,11 @@ input UpdateWorkOrderCustomerIdInput {
 input UpdateWorkOrderPropertyIdInput {
 	workOrderId: ID!
 	propertyId: ID!
+}
+
+input UpdateWorkOrderInvoicesInput {
+	workOrderId: ID!
+	invoice: ID
 }
 
 input UpdateWorkOrderTypeInput {
@@ -321,10 +397,27 @@ input UpdateWorkOrderCommentsInput {
 
 
 input RemoveWorkOrderInput {
-	workOrderIds: [ID!]!
+	workOrderId: ID!
 }
 
+# Thumbtack Review Types 
 
+type ThumbtackReviewAuthor {
+	name: String!
+}
+
+type ThumbtackReviewRating {
+	
+	ratingValue: Int!
+}
+
+type ThumbtackReview {
+	
+	datePublished: String!
+	description: String!
+	author: ThumbtackReviewAuthor!
+	reviewRating: ThumbtackReviewRating!
+}
 
 # Queries
 
@@ -347,8 +440,18 @@ type Query {
 	queryWorkOrdersByCustomer(customerId: ID!): [WorkOrder!]
 	queryWorkOrdersByProperty(propertyId: ID!): [WorkOrder!]
 
+	# Invoice Queries
+	queryInvoices: [Invoice!]
+	queryInvoiceById(invoiceId: ID!): Invoice!
+	queryInvoicesByCustomer(customerId: ID!): [Invoice!]
+	queryInvoicesByWorkOrder(workOrderId: ID!): [Invoice!]
+
+
 	# S3 Queries
 	getPresignedS3Url(imgKey: String!, commandType: String!, altTag: String!): String!
+
+	# Thumbtack Review Queries
+	queryThumbtackReviews: [ThumbtackReview!]
 
 }
 
@@ -373,6 +476,7 @@ type Mutation {
 	updateCustomerEmail(input: UpdateCustomerEmailInput!): Customer!
 	updateCustomerPhone(input: UpdateCustomerPhoneInput!): Customer!
 	updateCustomerBusinessName(input: UpdateCustomerBusinessNameInput!): Customer!
+	updateCustomerProperties(input: UpdateCustomerPropertiesInput!): Customer!
 	deleteCustomer(input: RemoveCustomerInput!): Customer!
 
 
@@ -400,8 +504,19 @@ type Mutation {
 	updateWorkOrderComments(input: UpdateWorkOrderCommentsInput!): WorkOrder!
 	deleteWorkOrder(input: RemoveWorkOrderInput!): WorkOrder!
 
+	# Invoice Mutations
+	createInvoice(input: CreateInvoiceInput!): Invoice!
+	updateInvoiceDate(input: UpdateInvoiceDateInput!): Invoice!
+	updateInvoiceCustomerId(input: UpdateInvoiceCustomerIdInput!): Invoice!
+	updateInvoiceWorkOrders(input: UpdateInvoiceWorkOrdersInput!): Invoice!
+	updateInvoiceQuote(input: UpdateInvoiceQuoteInput!): Invoice!
+	updateInvoiceTotal(input: UpdateInvoiceTotalInput!): Invoice!
+	updateInvoiceCharged(input: UpdateInvoiceChargedInput!): Invoice!
+	updateInvoicePaid(input: UpdateInvoicePaidInput!): Invoice!
+	deleteInvoice(input: RemoveInvoiceInput!): Invoice!
+	
+
 	# S3 Mutations
 
 	deleteS3Objects(input: DeleteS3ObjectInput!): DeleteS3ObjectResponse!
 }
-

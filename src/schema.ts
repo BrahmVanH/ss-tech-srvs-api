@@ -405,21 +405,21 @@ input RemoveWorkOrderInput {
 
 # Thumbtack Review Types 
 
-type ReviewAuthor {
+type ThumbtackReviewAuthor {
 	name: String!
 }
 
-type ReviewRating {
+type ThumbtackReviewRating {
 	
 	ratingValue: Int!
 }
 
-type Review {
+type ThumbtackReview {
 	
 	datePublished: String!
 	description: String!
-	author: ReviewAuthor!
-	reviewRating: ReviewRating!
+	author: ThumbtackReviewAuthor!
+	reviewRating: ThumbtackReviewRating!
 }
 
 # Queries
@@ -454,7 +454,7 @@ type Query {
 	getPresignedS3Url(imgKey: String!, commandType: String!, altTag: String!): String!
 
 	# Thumbtack Review Queries
-	queryThumbtackReviews: [Review!]
+	queryThumbtackReviews: [ThumbtackReview!]
 
 }
 

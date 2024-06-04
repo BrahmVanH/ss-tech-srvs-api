@@ -451,7 +451,7 @@ export type Query = {
   queryInvoicesByWorkOrder?: Maybe<Array<Invoice>>;
   queryProperties?: Maybe<Array<Property>>;
   queryPropertyById: Property;
-  queryThumbtackReviews?: Maybe<Array<Review>>;
+  queryThumbtackReviews?: Maybe<Array<ThumbtackReview>>;
   queryWorkOrderById: WorkOrder;
   queryWorkOrders?: Maybe<Array<WorkOrder>>;
   queryWorkOrdersByCustomer?: Maybe<Array<WorkOrder>>;
@@ -526,21 +526,21 @@ export type RemoveWorkOrderInput = {
   workOrderId: Scalars['ID']['input'];
 };
 
-export type Review = {
-  __typename?: 'Review';
-  author: ReviewAuthor;
+export type ThumbtackReview = {
+  __typename?: 'ThumbtackReview';
+  author: ThumbtackReviewAuthor;
   datePublished: Scalars['String']['output'];
   description: Scalars['String']['output'];
-  reviewRating: ReviewRating;
+  reviewRating: ThumbtackReviewRating;
 };
 
-export type ReviewAuthor = {
-  __typename?: 'ReviewAuthor';
+export type ThumbtackReviewAuthor = {
+  __typename?: 'ThumbtackReviewAuthor';
   name: Scalars['String']['output'];
 };
 
-export type ReviewRating = {
-  __typename?: 'ReviewRating';
+export type ThumbtackReviewRating = {
+  __typename?: 'ThumbtackReviewRating';
   ratingValue: Scalars['Int']['output'];
 };
 
@@ -863,10 +863,10 @@ export type ResolversTypes = {
   RemovePropertyInput: RemovePropertyInput;
   RemoveUserInput: RemoveUserInput;
   RemoveWorkOrderInput: RemoveWorkOrderInput;
-  Review: ResolverTypeWrapper<Review>;
-  ReviewAuthor: ResolverTypeWrapper<ReviewAuthor>;
-  ReviewRating: ResolverTypeWrapper<ReviewRating>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  ThumbtackReview: ResolverTypeWrapper<ThumbtackReview>;
+  ThumbtackReviewAuthor: ResolverTypeWrapper<ThumbtackReviewAuthor>;
+  ThumbtackReviewRating: ResolverTypeWrapper<ThumbtackReviewRating>;
   UpdateCustomerBusinessNameInput: UpdateCustomerBusinessNameInput;
   UpdateCustomerEmailInput: UpdateCustomerEmailInput;
   UpdateCustomerFirstNameInput: UpdateCustomerFirstNameInput;
@@ -939,10 +939,10 @@ export type ResolversParentTypes = {
   RemovePropertyInput: RemovePropertyInput;
   RemoveUserInput: RemoveUserInput;
   RemoveWorkOrderInput: RemoveWorkOrderInput;
-  Review: Review;
-  ReviewAuthor: ReviewAuthor;
-  ReviewRating: ReviewRating;
   String: Scalars['String']['output'];
+  ThumbtackReview: ThumbtackReview;
+  ThumbtackReviewAuthor: ThumbtackReviewAuthor;
+  ThumbtackReviewRating: ThumbtackReviewRating;
   UpdateCustomerBusinessNameInput: UpdateCustomerBusinessNameInput;
   UpdateCustomerEmailInput: UpdateCustomerEmailInput;
   UpdateCustomerFirstNameInput: UpdateCustomerFirstNameInput;
@@ -1104,27 +1104,27 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   queryInvoicesByWorkOrder?: Resolver<Maybe<Array<ResolversTypes['Invoice']>>, ParentType, ContextType, RequireFields<QueryQueryInvoicesByWorkOrderArgs, 'workOrderId'>>;
   queryProperties?: Resolver<Maybe<Array<ResolversTypes['Property']>>, ParentType, ContextType>;
   queryPropertyById?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<QueryQueryPropertyByIdArgs, 'propertyId'>>;
-  queryThumbtackReviews?: Resolver<Maybe<Array<ResolversTypes['Review']>>, ParentType, ContextType>;
+  queryThumbtackReviews?: Resolver<Maybe<Array<ResolversTypes['ThumbtackReview']>>, ParentType, ContextType>;
   queryWorkOrderById?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<QueryQueryWorkOrderByIdArgs, 'workOrderId'>>;
   queryWorkOrders?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType>;
   queryWorkOrdersByCustomer?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType, RequireFields<QueryQueryWorkOrdersByCustomerArgs, 'customerId'>>;
   queryWorkOrdersByProperty?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType, RequireFields<QueryQueryWorkOrdersByPropertyArgs, 'propertyId'>>;
 };
 
-export type ReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['Review'] = ResolversParentTypes['Review']> = {
-  author?: Resolver<ResolversTypes['ReviewAuthor'], ParentType, ContextType>;
+export type ThumbtackReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['ThumbtackReview'] = ResolversParentTypes['ThumbtackReview']> = {
+  author?: Resolver<ResolversTypes['ThumbtackReviewAuthor'], ParentType, ContextType>;
   datePublished?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  reviewRating?: Resolver<ResolversTypes['ReviewRating'], ParentType, ContextType>;
+  reviewRating?: Resolver<ResolversTypes['ThumbtackReviewRating'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ReviewAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReviewAuthor'] = ResolversParentTypes['ReviewAuthor']> = {
+export type ThumbtackReviewAuthorResolvers<ContextType = any, ParentType extends ResolversParentTypes['ThumbtackReviewAuthor'] = ResolversParentTypes['ThumbtackReviewAuthor']> = {
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ReviewRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReviewRating'] = ResolversParentTypes['ReviewRating']> = {
+export type ThumbtackReviewRatingResolvers<ContextType = any, ParentType extends ResolversParentTypes['ThumbtackReviewRating'] = ResolversParentTypes['ThumbtackReviewRating']> = {
   ratingValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1175,9 +1175,9 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Property?: PropertyResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  Review?: ReviewResolvers<ContextType>;
-  ReviewAuthor?: ReviewAuthorResolvers<ContextType>;
-  ReviewRating?: ReviewRatingResolvers<ContextType>;
+  ThumbtackReview?: ThumbtackReviewResolvers<ContextType>;
+  ThumbtackReviewAuthor?: ThumbtackReviewAuthorResolvers<ContextType>;
+  ThumbtackReviewRating?: ThumbtackReviewRatingResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   WorkOrder?: WorkOrderResolvers<ContextType>;
   imageObject?: ImageObjectResolvers<ContextType>;

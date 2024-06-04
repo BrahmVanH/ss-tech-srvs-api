@@ -11,6 +11,7 @@ const scrape = () => {
 
 	const scrapedData = execSync('python src/lib/thumbtack_scraper/thumbtack_scraper.py', { encoding: 'utf8' });
   const jsonString = scrapedData.replace(/ '/g, ' "').replace(/' /g, '" ').replace(/{'/g, '{"').replace(/'}/g, '"}').replace(/':/g, '":').replace(/',/g, '",');
+	console.log('jsonString', jsonString);
 	const reviewJson = JSON.parse(jsonString);
 
 	if (reviewJson.length === 0 || !reviewJson) {

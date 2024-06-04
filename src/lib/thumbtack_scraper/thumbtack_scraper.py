@@ -25,7 +25,7 @@ def scrape_thumbtack_reviews(url):
 
         # Extract review objects
         reviews = data_dict["@graph"][0].get("review")
-
+        # print(reviews)
         
         return reviews
 
@@ -46,5 +46,4 @@ if __name__ == "__main__":
     thumbtack_url = "https://www.thumbtack.com/mi/marquette/handyman/south-shore-mechanical-services/service/508465315204210696"
     scraped_reviews = scrape_thumbtack_reviews(thumbtack_url)
     print(f"{scraped_reviews}")
-    
     

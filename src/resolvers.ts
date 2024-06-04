@@ -44,7 +44,6 @@ import {
 	MutationDeletePropertyArgs,
 	MutationDeleteWorkOrderArgs,
 	MutationUpdateCustomerPropertiesArgs,
-	Review,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
