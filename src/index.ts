@@ -7,6 +7,8 @@ import { expressMiddleware } from '@apollo/server/express4';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
+import { makeExecutableSchema } from 'graphql-tools';
+import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
 
 dotenv.config();
 
@@ -15,9 +17,15 @@ const httpServer = http.createServer(app);
 
 const port = process.env.PORT ?? 4000;
 
-const server = new ApolloDServerDev<BaseContext>({
-	typeDefs,
+let schema = makeExecutableSchema({
+	typeDefs: [constraintDirectiveTypeDefs, typeDefs],
 	resolvers,
+});
+
+schema = constraintDirective()(schema);
+
+const server = new ApolloDServerDev<BaseContext>({
+	schema,
 	introspection: true,
 	plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });

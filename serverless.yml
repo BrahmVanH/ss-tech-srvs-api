@@ -1,4 +1,4 @@
-service: south-shore-mech-svcs-api
+service: south-shore-tech-svcs-api
 
 provider:
   name: aws

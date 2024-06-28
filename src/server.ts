@@ -1,4 +1,7 @@
 import { ApolloServer, BaseContext } from '@apollo/server';
+import { makeExecutableSchema } from 'graphql-tools';
+import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
+
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import { startServerAndCreateLambdaHandler, handlers, middleware } from '@as-integrations/aws-lambda';
@@ -6,9 +9,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const server = new ApolloServer<BaseContext>({
-	typeDefs,
+let schema = makeExecutableSchema({
+	typeDefs: [constraintDirectiveTypeDefs, typeDefs],
 	resolvers,
+});
+
+schema = constraintDirective()(schema);
+
+const server = new ApolloServer<BaseContext>({
+	schema,
 	introspection: true,
 });
 

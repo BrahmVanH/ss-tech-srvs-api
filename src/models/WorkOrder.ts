@@ -28,6 +28,10 @@ const workOrderSchema: Schema<WorkOrder> = new Schema<WorkOrder>({
 		type: String,
 		required: true,
 	},
+	completed: {
+		type: Boolean,
+		required: true,
+	},
 	completedBy: {
 		type: String,
 		required: true,

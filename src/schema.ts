@@ -99,16 +99,14 @@ type Customer {
 	properties: [Property]!
 }
 
-input NewCustomerInput {
+
+
+input CreateCustomerInput {
 	firstName: String!
 	lastName: String!
 	email: String
 	phone: String!
 	businessName: String!
-}
-
-input CreateCustomerInput {
-	customer: NewCustomerInput!
 }
 
 
@@ -165,7 +163,9 @@ type Invoice {
 	paid: Boolean!
 }
 
-input NewInvoiceInput {
+
+
+input CreateInvoiceInput {
 	date: String!
 	invoiceNumber: String!
 	customerId: ID!
@@ -174,10 +174,6 @@ input NewInvoiceInput {
 	total: Float
 	charged: Boolean!
 	paid: Boolean!
-}
-
-input CreateInvoiceInput {
-	invoice: NewInvoiceInput!
 }
 
 input UpdateInvoiceDateInput {
@@ -255,16 +251,14 @@ type Property {
 	s3FolderKey: String! 
 }
 
-input NewPropertyInput {
+
+
+input CreatePropertyInput {
 	propertyName: String!
 	propertyAddress: AddressInput!
 	propertyDescription: String!
 	agent: ID!
 	s3FolderKey: String
-}
-
-input CreatePropertyInput {
-	property: NewPropertyInput!
 }
 
 input UpdatePropertyNameInput {
@@ -309,6 +303,7 @@ type WorkOrder {
 	invoices: [Invoice]!
 	type: String!
 	description: String!
+	completed: Boolean!
 	completedBy: String!
 	quote: Float!
 	total: Float!
@@ -318,7 +313,9 @@ type WorkOrder {
 	}
 
 
-input NewWorkOrderInput {
+
+
+input CreateWorkOrderInput {
 	date: String!
 	customerId: ID!
 	propertyId: ID!
@@ -330,11 +327,6 @@ input NewWorkOrderInput {
 	charged: Boolean!
 	paid: Boolean!
 	comments: String
-
-}
-
-input CreateWorkOrderInput {
-	workOrder: NewWorkOrderInput!
 }
 
 input UpdateWorkOrderDateInput {
@@ -365,6 +357,11 @@ input UpdateWorkOrderTypeInput {
 input UpdateWorkOrderDescriptionInput {
 	workOrderId: ID!
 	description: String!
+}
+
+input UpdateWorkOrderCompletedInput {
+	workOrderId: ID!
+	completed: Boolean!
 }
 
 input UpdateWorkOrderCompletedByInput {
@@ -422,6 +419,28 @@ type ThumbtackReview {
 	reviewRating: ThumbtackReviewRating!
 }
 
+# Schedule Services & CRUD Types
+
+type ScheduleServiceMessage {
+	givenName: String!
+	familyName: String!
+	tel: String!
+	email: String!
+	location: String!
+	service: String!
+	message: String!
+}
+
+input ScheduleServiceMessageInput {
+	givenName: String! @constraint(minLength: 1, maxLength: 20)
+	familyName: String! @constraint(minLength: 1, maxLength: 20)
+	tel: String! @constraint(minLength: 1, maxLength: 12)
+	email: String! @constraint(format: "email", maxLength: 255)
+	location: String! @constraint(minLength: 1, maxLength: 10)
+	service: String! @constraint(minLength: 1, maxLength: 40)
+	message: String! @constraint(pattern: "^[0-9a-zA-Z\s]*$", minLength: 10, maxLength: 255)
+}
+
 # Queries
 
 type Query {
@@ -459,7 +478,6 @@ type Query {
 }
 
 # Mutations
-
 
 type Mutation {
 	# User Mutations
@@ -499,6 +517,7 @@ type Mutation {
 	updateWorkOrderPropertyId(input: UpdateWorkOrderPropertyIdInput!): WorkOrder!
 	updateWorkOrderType(input: UpdateWorkOrderTypeInput!): WorkOrder!
 	updateWorkOrderDescription(input: UpdateWorkOrderDescriptionInput!): WorkOrder!
+	updateWorkOrderCompleted(input: UpdateWorkOrderCompletedInput!): WorkOrder!
 	updateWorkOrderCompletedBy(input: UpdateWorkOrderCompletedByInput!): WorkOrder!
 	updateWorkOrderQuote(input: UpdateWorkOrderQuoteInput!): WorkOrder!
 	updateWorkOrderTotal(input: UpdateWorkOrderTotalInput!): WorkOrder!
@@ -517,7 +536,10 @@ type Mutation {
 	updateInvoiceCharged(input: UpdateInvoiceChargedInput!): Invoice!
 	updateInvoicePaid(input: UpdateInvoicePaidInput!): Invoice!
 	deleteInvoice(input: RemoveInvoiceInput!): Invoice!
-	
+
+	# Schedule Service Mutations
+	sendScheduleServiceMessage(input: ScheduleServiceMessageInput!): String!
+
 
 	# S3 Mutations
 

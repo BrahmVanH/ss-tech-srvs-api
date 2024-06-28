@@ -35,6 +35,12 @@ const customerSchema: Schema<Customer> = new Schema<Customer>(
 				ref: 'Invoice',
 			},
 		],
+		properties: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Property',
+			},
+		],
 	},
 	{
 		timestamps: true,

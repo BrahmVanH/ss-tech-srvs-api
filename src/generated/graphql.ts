@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -14,6 +14,13 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  email_String_NotNull_maxLength_255_format_email: { input: any; output: any; }
+  familyName_String_NotNull_minLength_1_maxLength_20: { input: any; output: any; }
+  givenName_String_NotNull_minLength_1_maxLength_20: { input: any; output: any; }
+  location_String_NotNull_minLength_1_maxLength_10: { input: any; output: any; }
+  message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs: { input: any; output: any; }
+  service_String_NotNull_minLength_1_maxLength_40: { input: any; output: any; }
+  tel_String_NotNull_minLength_1_maxLength_12: { input: any; output: any; }
 };
 
 export type Address = {
@@ -43,15 +50,30 @@ export type Auth = {
 };
 
 export type CreateCustomerInput = {
-  customer: NewCustomerInput;
+  businessName: Scalars['String']['input'];
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+  phone: Scalars['String']['input'];
 };
 
 export type CreateInvoiceInput = {
-  invoice: NewInvoiceInput;
+  charged: Scalars['Boolean']['input'];
+  customerId: Scalars['ID']['input'];
+  date: Scalars['String']['input'];
+  invoiceNumber: Scalars['String']['input'];
+  paid: Scalars['Boolean']['input'];
+  quote?: InputMaybe<Scalars['Float']['input']>;
+  total?: InputMaybe<Scalars['Float']['input']>;
+  workOrders?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
 };
 
 export type CreatePropertyInput = {
-  property: NewPropertyInput;
+  agent: Scalars['ID']['input'];
+  propertyAddress: AddressInput;
+  propertyDescription: Scalars['String']['input'];
+  propertyName: Scalars['String']['input'];
+  s3FolderKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateUserInput = {
@@ -63,7 +85,17 @@ export type CreateUserInput = {
 };
 
 export type CreateWorkOrderInput = {
-  workOrder: NewWorkOrderInput;
+  charged: Scalars['Boolean']['input'];
+  comments?: InputMaybe<Scalars['String']['input']>;
+  completedBy?: InputMaybe<Scalars['String']['input']>;
+  customerId: Scalars['ID']['input'];
+  date: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  paid: Scalars['Boolean']['input'];
+  propertyId: Scalars['ID']['input'];
+  quote?: InputMaybe<Scalars['Float']['input']>;
+  total?: InputMaybe<Scalars['Float']['input']>;
+  type: Scalars['String']['input'];
 };
 
 export type Customer = {
@@ -122,6 +154,7 @@ export type Mutation = {
   deleteWorkOrder: WorkOrder;
   loginUser: Auth;
   removeUser: Auth;
+  sendScheduleServiceMessage: Scalars['String']['output'];
   updateCustomerBusinessName: Customer;
   updateCustomerEmail: Customer;
   updateCustomerFirstName: Customer;
@@ -147,6 +180,7 @@ export type Mutation = {
   updateUserUsername: Auth;
   updateWorkOrderCharged: WorkOrder;
   updateWorkOrderComments: WorkOrder;
+  updateWorkOrderCompleted: WorkOrder;
   updateWorkOrderCompletedBy: WorkOrder;
   updateWorkOrderCustomerId: WorkOrder;
   updateWorkOrderDate: WorkOrder;
@@ -216,6 +250,11 @@ export type MutationLoginUserArgs = {
 
 export type MutationRemoveUserArgs = {
   input: RemoveUserInput;
+};
+
+
+export type MutationSendScheduleServiceMessageArgs = {
+  input: ScheduleServiceMessageInput;
 };
 
 
@@ -344,6 +383,11 @@ export type MutationUpdateWorkOrderCommentsArgs = {
 };
 
 
+export type MutationUpdateWorkOrderCompletedArgs = {
+  input: UpdateWorkOrderCompletedInput;
+};
+
+
 export type MutationUpdateWorkOrderCompletedByArgs = {
   input: UpdateWorkOrderCompletedByInput;
 };
@@ -386,47 +430,6 @@ export type MutationUpdateWorkOrderTotalArgs = {
 
 export type MutationUpdateWorkOrderTypeArgs = {
   input: UpdateWorkOrderTypeInput;
-};
-
-export type NewCustomerInput = {
-  businessName: Scalars['String']['input'];
-  email?: InputMaybe<Scalars['String']['input']>;
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  phone: Scalars['String']['input'];
-};
-
-export type NewInvoiceInput = {
-  charged: Scalars['Boolean']['input'];
-  customerId: Scalars['ID']['input'];
-  date: Scalars['String']['input'];
-  invoiceNumber: Scalars['String']['input'];
-  paid: Scalars['Boolean']['input'];
-  quote?: InputMaybe<Scalars['Float']['input']>;
-  total?: InputMaybe<Scalars['Float']['input']>;
-  workOrders?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-};
-
-export type NewPropertyInput = {
-  agent: Scalars['ID']['input'];
-  propertyAddress: AddressInput;
-  propertyDescription: Scalars['String']['input'];
-  propertyName: Scalars['String']['input'];
-  s3FolderKey?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type NewWorkOrderInput = {
-  charged: Scalars['Boolean']['input'];
-  comments?: InputMaybe<Scalars['String']['input']>;
-  completedBy?: InputMaybe<Scalars['String']['input']>;
-  customerId: Scalars['ID']['input'];
-  date: Scalars['String']['input'];
-  description: Scalars['String']['input'];
-  paid: Scalars['Boolean']['input'];
-  propertyId: Scalars['ID']['input'];
-  quote?: InputMaybe<Scalars['Float']['input']>;
-  total?: InputMaybe<Scalars['Float']['input']>;
-  type: Scalars['String']['input'];
 };
 
 export type Property = {
@@ -524,6 +527,27 @@ export type RemoveUserInput = {
 
 export type RemoveWorkOrderInput = {
   workOrderId: Scalars['ID']['input'];
+};
+
+export type ScheduleServiceMessage = {
+  __typename?: 'ScheduleServiceMessage';
+  email: Scalars['String']['output'];
+  familyName: Scalars['String']['output'];
+  givenName: Scalars['String']['output'];
+  location: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+  service: Scalars['String']['output'];
+  tel: Scalars['String']['output'];
+};
+
+export type ScheduleServiceMessageInput = {
+  email: Scalars['email_String_NotNull_maxLength_255_format_email']['input'];
+  familyName: Scalars['familyName_String_NotNull_minLength_1_maxLength_20']['input'];
+  givenName: Scalars['givenName_String_NotNull_minLength_1_maxLength_20']['input'];
+  location: Scalars['location_String_NotNull_minLength_1_maxLength_10']['input'];
+  message: Scalars['message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs']['input'];
+  service: Scalars['service_String_NotNull_minLength_1_maxLength_40']['input'];
+  tel: Scalars['tel_String_NotNull_minLength_1_maxLength_12']['input'];
 };
 
 export type ThumbtackReview = {
@@ -681,6 +705,11 @@ export type UpdateWorkOrderCompletedByInput = {
   workOrderId: Scalars['ID']['input'];
 };
 
+export type UpdateWorkOrderCompletedInput = {
+  completed: Scalars['Boolean']['input'];
+  workOrderId: Scalars['ID']['input'];
+};
+
 export type UpdateWorkOrderCustomerIdInput = {
   customerId: Scalars['ID']['input'];
   workOrderId: Scalars['ID']['input'];
@@ -741,6 +770,7 @@ export type WorkOrder = {
   _id: Scalars['ID']['output'];
   charged: Scalars['Boolean']['output'];
   comments: Scalars['String']['output'];
+  completed: Scalars['Boolean']['output'];
   completedBy: Scalars['String']['output'];
   customerId: Customer;
   date: Scalars['String']['output'];
@@ -852,10 +882,6 @@ export type ResolversTypes = {
   Invoice: ResolverTypeWrapper<Invoice>;
   LoginUserInput: LoginUserInput;
   Mutation: ResolverTypeWrapper<{}>;
-  NewCustomerInput: NewCustomerInput;
-  NewInvoiceInput: NewInvoiceInput;
-  NewPropertyInput: NewPropertyInput;
-  NewWorkOrderInput: NewWorkOrderInput;
   Property: ResolverTypeWrapper<Property>;
   Query: ResolverTypeWrapper<{}>;
   RemoveCustomerInput: RemoveCustomerInput;
@@ -863,6 +889,8 @@ export type ResolversTypes = {
   RemovePropertyInput: RemovePropertyInput;
   RemoveUserInput: RemoveUserInput;
   RemoveWorkOrderInput: RemoveWorkOrderInput;
+  ScheduleServiceMessage: ResolverTypeWrapper<ScheduleServiceMessage>;
+  ScheduleServiceMessageInput: ScheduleServiceMessageInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   ThumbtackReview: ResolverTypeWrapper<ThumbtackReview>;
   ThumbtackReviewAuthor: ResolverTypeWrapper<ThumbtackReviewAuthor>;
@@ -894,6 +922,7 @@ export type ResolversTypes = {
   UpdateWorkOrderChargedInput: UpdateWorkOrderChargedInput;
   UpdateWorkOrderCommentsInput: UpdateWorkOrderCommentsInput;
   UpdateWorkOrderCompletedByInput: UpdateWorkOrderCompletedByInput;
+  UpdateWorkOrderCompletedInput: UpdateWorkOrderCompletedInput;
   UpdateWorkOrderCustomerIdInput: UpdateWorkOrderCustomerIdInput;
   UpdateWorkOrderDateInput: UpdateWorkOrderDateInput;
   UpdateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
@@ -905,7 +934,14 @@ export type ResolversTypes = {
   UpdateWorkOrderTypeInput: UpdateWorkOrderTypeInput;
   User: ResolverTypeWrapper<User>;
   WorkOrder: ResolverTypeWrapper<WorkOrder>;
+  email_String_NotNull_maxLength_255_format_email: ResolverTypeWrapper<Scalars['email_String_NotNull_maxLength_255_format_email']['output']>;
+  familyName_String_NotNull_minLength_1_maxLength_20: ResolverTypeWrapper<Scalars['familyName_String_NotNull_minLength_1_maxLength_20']['output']>;
+  givenName_String_NotNull_minLength_1_maxLength_20: ResolverTypeWrapper<Scalars['givenName_String_NotNull_minLength_1_maxLength_20']['output']>;
   imageObject: ResolverTypeWrapper<ImageObject>;
+  location_String_NotNull_minLength_1_maxLength_10: ResolverTypeWrapper<Scalars['location_String_NotNull_minLength_1_maxLength_10']['output']>;
+  message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs: ResolverTypeWrapper<Scalars['message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs']['output']>;
+  service_String_NotNull_minLength_1_maxLength_40: ResolverTypeWrapper<Scalars['service_String_NotNull_minLength_1_maxLength_40']['output']>;
+  tel_String_NotNull_minLength_1_maxLength_12: ResolverTypeWrapper<Scalars['tel_String_NotNull_minLength_1_maxLength_12']['output']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -928,10 +964,6 @@ export type ResolversParentTypes = {
   Invoice: Invoice;
   LoginUserInput: LoginUserInput;
   Mutation: {};
-  NewCustomerInput: NewCustomerInput;
-  NewInvoiceInput: NewInvoiceInput;
-  NewPropertyInput: NewPropertyInput;
-  NewWorkOrderInput: NewWorkOrderInput;
   Property: Property;
   Query: {};
   RemoveCustomerInput: RemoveCustomerInput;
@@ -939,6 +971,8 @@ export type ResolversParentTypes = {
   RemovePropertyInput: RemovePropertyInput;
   RemoveUserInput: RemoveUserInput;
   RemoveWorkOrderInput: RemoveWorkOrderInput;
+  ScheduleServiceMessage: ScheduleServiceMessage;
+  ScheduleServiceMessageInput: ScheduleServiceMessageInput;
   String: Scalars['String']['output'];
   ThumbtackReview: ThumbtackReview;
   ThumbtackReviewAuthor: ThumbtackReviewAuthor;
@@ -970,6 +1004,7 @@ export type ResolversParentTypes = {
   UpdateWorkOrderChargedInput: UpdateWorkOrderChargedInput;
   UpdateWorkOrderCommentsInput: UpdateWorkOrderCommentsInput;
   UpdateWorkOrderCompletedByInput: UpdateWorkOrderCompletedByInput;
+  UpdateWorkOrderCompletedInput: UpdateWorkOrderCompletedInput;
   UpdateWorkOrderCustomerIdInput: UpdateWorkOrderCustomerIdInput;
   UpdateWorkOrderDateInput: UpdateWorkOrderDateInput;
   UpdateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
@@ -981,8 +1016,36 @@ export type ResolversParentTypes = {
   UpdateWorkOrderTypeInput: UpdateWorkOrderTypeInput;
   User: User;
   WorkOrder: WorkOrder;
+  email_String_NotNull_maxLength_255_format_email: Scalars['email_String_NotNull_maxLength_255_format_email']['output'];
+  familyName_String_NotNull_minLength_1_maxLength_20: Scalars['familyName_String_NotNull_minLength_1_maxLength_20']['output'];
+  givenName_String_NotNull_minLength_1_maxLength_20: Scalars['givenName_String_NotNull_minLength_1_maxLength_20']['output'];
   imageObject: ImageObject;
+  location_String_NotNull_minLength_1_maxLength_10: Scalars['location_String_NotNull_minLength_1_maxLength_10']['output'];
+  message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs: Scalars['message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs']['output'];
+  service_String_NotNull_minLength_1_maxLength_40: Scalars['service_String_NotNull_minLength_1_maxLength_40']['output'];
+  tel_String_NotNull_minLength_1_maxLength_12: Scalars['tel_String_NotNull_minLength_1_maxLength_12']['output'];
 };
+
+export type ConstraintDirectiveArgs = {
+  contains?: Maybe<Scalars['String']['input']>;
+  endsWith?: Maybe<Scalars['String']['input']>;
+  exclusiveMax?: Maybe<Scalars['Float']['input']>;
+  exclusiveMin?: Maybe<Scalars['Float']['input']>;
+  format?: Maybe<Scalars['String']['input']>;
+  max?: Maybe<Scalars['Float']['input']>;
+  maxItems?: Maybe<Scalars['Int']['input']>;
+  maxLength?: Maybe<Scalars['Int']['input']>;
+  min?: Maybe<Scalars['Float']['input']>;
+  minItems?: Maybe<Scalars['Int']['input']>;
+  minLength?: Maybe<Scalars['Int']['input']>;
+  multipleOf?: Maybe<Scalars['Float']['input']>;
+  notContains?: Maybe<Scalars['String']['input']>;
+  pattern?: Maybe<Scalars['String']['input']>;
+  startsWith?: Maybe<Scalars['String']['input']>;
+  uniqueTypeName?: Maybe<Scalars['String']['input']>;
+};
+
+export type ConstraintDirectiveResolver<Result, Parent, ContextType = any, Args = ConstraintDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type AddressResolvers<ContextType = any, ParentType extends ResolversParentTypes['Address'] = ResolversParentTypes['Address']> = {
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -1047,6 +1110,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteWorkOrder?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationDeleteWorkOrderArgs, 'input'>>;
   loginUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'input'>>;
   removeUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationRemoveUserArgs, 'input'>>;
+  sendScheduleServiceMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSendScheduleServiceMessageArgs, 'input'>>;
   updateCustomerBusinessName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerBusinessNameArgs, 'input'>>;
   updateCustomerEmail?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerEmailArgs, 'input'>>;
   updateCustomerFirstName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerFirstNameArgs, 'input'>>;
@@ -1072,6 +1136,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateUserUsername?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationUpdateUserUsernameArgs, 'input'>>;
   updateWorkOrderCharged?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderChargedArgs, 'input'>>;
   updateWorkOrderComments?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderCommentsArgs, 'input'>>;
+  updateWorkOrderCompleted?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderCompletedArgs, 'input'>>;
   updateWorkOrderCompletedBy?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderCompletedByArgs, 'input'>>;
   updateWorkOrderCustomerId?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderCustomerIdArgs, 'input'>>;
   updateWorkOrderDate?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderDateArgs, 'input'>>;
@@ -1111,6 +1176,17 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   queryWorkOrdersByProperty?: Resolver<Maybe<Array<ResolversTypes['WorkOrder']>>, ParentType, ContextType, RequireFields<QueryQueryWorkOrdersByPropertyArgs, 'propertyId'>>;
 };
 
+export type ScheduleServiceMessageResolvers<ContextType = any, ParentType extends ResolversParentTypes['ScheduleServiceMessage'] = ResolversParentTypes['ScheduleServiceMessage']> = {
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  location?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  service?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  tel?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ThumbtackReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['ThumbtackReview'] = ResolversParentTypes['ThumbtackReview']> = {
   author?: Resolver<ResolversTypes['ThumbtackReviewAuthor'], ParentType, ContextType>;
   datePublished?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1143,6 +1219,7 @@ export type WorkOrderResolvers<ContextType = any, ParentType extends ResolversPa
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   charged?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  completed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   completedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   customerId?: Resolver<ResolversTypes['Customer'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1157,6 +1234,18 @@ export type WorkOrderResolvers<ContextType = any, ParentType extends ResolversPa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface Email_String_NotNull_MaxLength_255_Format_EmailScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['email_String_NotNull_maxLength_255_format_email'], any> {
+  name: 'email_String_NotNull_maxLength_255_format_email';
+}
+
+export interface FamilyName_String_NotNull_MinLength_1_MaxLength_20ScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['familyName_String_NotNull_minLength_1_maxLength_20'], any> {
+  name: 'familyName_String_NotNull_minLength_1_maxLength_20';
+}
+
+export interface GivenName_String_NotNull_MinLength_1_MaxLength_20ScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['givenName_String_NotNull_minLength_1_maxLength_20'], any> {
+  name: 'givenName_String_NotNull_minLength_1_maxLength_20';
+}
+
 export type ImageObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['imageObject'] = ResolversParentTypes['imageObject']> = {
   imgKey?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   original?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1165,6 +1254,22 @@ export type ImageObjectResolvers<ContextType = any, ParentType extends Resolvers
   thumbnailAlt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface Location_String_NotNull_MinLength_1_MaxLength_10ScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['location_String_NotNull_minLength_1_maxLength_10'], any> {
+  name: 'location_String_NotNull_minLength_1_maxLength_10';
+}
+
+export interface Message_String_NotNull_MinLength_10_MaxLength_255_Pattern_09azAZsScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs'], any> {
+  name: 'message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs';
+}
+
+export interface Service_String_NotNull_MinLength_1_MaxLength_40ScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['service_String_NotNull_minLength_1_maxLength_40'], any> {
+  name: 'service_String_NotNull_minLength_1_maxLength_40';
+}
+
+export interface Tel_String_NotNull_MinLength_1_MaxLength_12ScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['tel_String_NotNull_minLength_1_maxLength_12'], any> {
+  name: 'tel_String_NotNull_minLength_1_maxLength_12';
+}
 
 export type Resolvers<ContextType = any> = {
   Address?: AddressResolvers<ContextType>;
@@ -1175,11 +1280,22 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Property?: PropertyResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  ScheduleServiceMessage?: ScheduleServiceMessageResolvers<ContextType>;
   ThumbtackReview?: ThumbtackReviewResolvers<ContextType>;
   ThumbtackReviewAuthor?: ThumbtackReviewAuthorResolvers<ContextType>;
   ThumbtackReviewRating?: ThumbtackReviewRatingResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   WorkOrder?: WorkOrderResolvers<ContextType>;
+  email_String_NotNull_maxLength_255_format_email?: GraphQLScalarType;
+  familyName_String_NotNull_minLength_1_maxLength_20?: GraphQLScalarType;
+  givenName_String_NotNull_minLength_1_maxLength_20?: GraphQLScalarType;
   imageObject?: ImageObjectResolvers<ContextType>;
+  location_String_NotNull_minLength_1_maxLength_10?: GraphQLScalarType;
+  message_String_NotNull_minLength_10_maxLength_255_pattern_09azAZs?: GraphQLScalarType;
+  service_String_NotNull_minLength_1_maxLength_40?: GraphQLScalarType;
+  tel_String_NotNull_minLength_1_maxLength_12?: GraphQLScalarType;
 };
 
+export type DirectiveResolvers<ContextType = any> = {
+  constraint?: ConstraintDirectiveResolver<any, any, ContextType>;
+};

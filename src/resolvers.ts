@@ -44,11 +44,14 @@ import {
 	MutationDeletePropertyArgs,
 	MutationDeleteWorkOrderArgs,
 	MutationUpdateCustomerPropertiesArgs,
+	MutationUpdateWorkOrderCompletedArgs,
+	MutationSendScheduleServiceMessageArgs,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
 import Invoice from './models/Invoice';
 import scrape from './lib/thumbtack_scraper';
+import { Types } from 'mongoose';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -75,7 +78,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const customers = await Customer.find().populate('workOrders').populate('invoices');
+				const customers = await Customer.find().populate('workOrders').populate('invoices').populate('properties');
 				console.log('customers', customers);
 				if (!customers) {
 					throw new Error('Error fetching all customers from database');
@@ -111,7 +114,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const properties = await Property.find();
+				const properties = await Property.find().populate('agent');
 
 				if (!properties) {
 					throw new Error('Error fetching all properties from database');
@@ -554,7 +557,7 @@ const resolvers: Resolvers = {
 			}
 		},
 		createCustomer: async (_: {}, args: MutationCreateCustomerArgs, __: any) => {
-			const { customer } = args.input;
+			const customer = args.input;
 			if (!customer) {
 				throw new Error('No customer object was presented for creating customer');
 			}
@@ -642,7 +645,11 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { properties: { $push: property } }, { new: true });
+				if (!property) {
+					throw new Error('Could not find property');
+				}
+
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { $push: { properties: new Types.ObjectId(property) } }, { new: true });
 
 				if (!updatedCustomer) {
 					throw new Error('Could not update customer properties');
@@ -674,7 +681,7 @@ const resolvers: Resolvers = {
 			}
 		},
 		createProperty: async (_: {}, args: MutationCreatePropertyArgs, __: any) => {
-			const { property } = args.input;
+			const property = args.input;
 			if (!property) {
 				throw new Error('No property object was presented for creating property');
 			}
@@ -688,7 +695,7 @@ const resolvers: Resolvers = {
 					throw new Error('Could not create property');
 				}
 
-				const customer = await Customer.findOneAndUpdate({ _id: property.agent }, { $push: { properties: newProperty._id } });
+				const customer = await Customer.findOneAndUpdate({ _id: property.agent }, { $push: { properties: new Types.ObjectId(newProperty._id) } });
 
 				if (!customer) {
 					throw new Error('Could not update customer with new property');
@@ -800,7 +807,7 @@ const resolvers: Resolvers = {
 			}
 		},
 		createWorkOrder: async (_: {}, args: MutationCreateWorkOrderArgs, __: any) => {
-			const { workOrder } = args.input;
+			const workOrder = args.input;
 			if (!workOrder) {
 				throw new Error('No work order object was presented for creating work order');
 			}
@@ -811,6 +818,7 @@ const resolvers: Resolvers = {
 				const newWorkOrder = await WorkOrder.create({
 					...workOrder,
 					lastUpdated: new Date(),
+					completed: false,
 					completedBy: workOrder.completedBy ?? '',
 					quote: workOrder.quote ?? 0,
 					total: workOrder.total ?? 0,
@@ -822,7 +830,7 @@ const resolvers: Resolvers = {
 					throw new Error('Could not create work order');
 				}
 
-				const customer = await Customer.findOneAndUpdate({ _id: workOrder.customerId }, { $push: { workOrders: newWorkOrder._id } });
+				const customer = await Customer.findOneAndUpdate({ _id: workOrder.customerId }, { $push: { workOrders: new Types.ObjectId(newWorkOrder._id) } });
 
 				if (!customer) {
 					throw new Error('Could not update customer with new work order');
@@ -931,6 +939,26 @@ const resolvers: Resolvers = {
 				return updatedWorkOrder;
 			} catch (err: any) {
 				throw new Error('Error in updating work order description: ' + err.message);
+			}
+		},
+		updateWorkOrderCompleted: async (_: {}, args: MutationUpdateWorkOrderCompletedArgs, __: any) => {
+			const { workOrderId, completed } = args.input;
+			if (!workOrderId || completed === undefined) {
+				throw new Error('workOrderId and completed fields must be filled to update work order completed');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { completed, lastUpdated: new Date() }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order completed');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order completed: ' + err.message);
 			}
 		},
 		updateWorkOrderCompletedBy: async (_: {}, args: MutationUpdateWorkOrderCompletedByArgs, __: any) => {
@@ -1074,7 +1102,7 @@ const resolvers: Resolvers = {
 			}
 		},
 		createInvoice: async (_: {}, args: MutationCreateInvoiceArgs, __: any) => {
-			const { invoice } = args.input;
+			const invoice = args.input;
 			if (!invoice) {
 				throw new Error('No invoice object was presented for creating invoice');
 			}
@@ -1090,7 +1118,7 @@ const resolvers: Resolvers = {
 
 				invoice.workOrders?.forEach(async (workOrderId) => {
 					try {
-						const workOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { $push: { invoices: newInvoice._id } });
+						const workOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { $push: { invoices: new Types.ObjectId(newInvoice._id) } });
 						if (!workOrder) {
 							throw new Error('Could not update work order with new invoice');
 						}
@@ -1099,7 +1127,7 @@ const resolvers: Resolvers = {
 					}
 				});
 
-				const customer = await Customer.findOneAndUpdate({ _id: invoice.customerId }, { $push: { invoices: newInvoice._id } });
+				const customer = await Customer.findOneAndUpdate({ _id: invoice.customerId }, { $push: { invoices: new Types.ObjectId(newInvoice._id) } });
 
 				if (!customer) {
 					throw new Error('Could not update customer with new invoice');
@@ -1249,6 +1277,27 @@ const resolvers: Resolvers = {
 				throw new Error('Error in deleting invoice: ' + err.message);
 			}
 		},
+		sendScheduleServiceMessage: async (_: {}, args: MutationSendScheduleServiceMessageArgs, __: any) => {
+			const { givenName, familyName, tel, email, location, service, message } = args.input;
+
+			if (!givenName || !familyName || !tel || !email || !location || !service || !message) {
+				throw new Error('All fields must be filled to send message');
+			}
+
+			try {
+				// send email with nodemailer
+
+				// if success
+				// return '200 ok'
+				// else
+				// return '500 error'
+
+				return 'butts';
+			} catch (err: any) {
+				throw new Error('Error in sending message: ' + err.message);
+			}
+		},
+
 		// deleteS3Objects: async (_: {}, args: any, __: any) => {
 		// 	const { imgKeys } = args?.input;
 		// 	if (!imgKeys || imgKeys.length === 0) {
