@@ -1,5 +1,5 @@
 import { ApolloServer, BaseContext } from '@apollo/server';
-import { makeExecutableSchema } from 'graphql-tools';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
 
 import typeDefs from './schema';

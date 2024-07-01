@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { ScheduleServiceMessageInput } from '../../generated/graphql';
 
 // const transporter = nodemailer.createTransport({
 // 	service: 'smtp.ethereal.email',
@@ -10,47 +11,52 @@ import nodemailer from 'nodemailer';
 // 	},
 // });
 
-// async..await is not allowed in global scope, must use a wrapper
-async function main() {
-	// send mail with defined transport object
-	const info = await transporter.sendMail({
-		from: '"Maddison Foo Koch 👻" <maddison53@ethereal.email>', // sender address
-		to: 'bar@example.com, baz@example.com', // list of receivers
-		subject: 'Hello ✔', // Subject line
-		text: 'Hello world?', // plain text body
-		html: '<b>Hello world?</b>', // html body
-	});
+//  More info on configuring with Titan 
+//  https://support.titan.email/hc/en-us/articles/4405162224665-Configuring-Titan-on-Email-Scripts
 
-	console.log('Message sent: %s', info.messageId);
-	// Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
-}
 
-export const sendScheduleServiceEmail = (messageContent) => {
-  const { name, familyName, tel, email, location, service, message } = messageContent;
+export const sendScheduleServiceEmail = async (messageContent: ScheduleServiceMessageInput) => {
+	const { givenName, familyName, tel, email, location, service, message } = messageContent;
+
+	if (!givenName || !familyName || !tel || !email || !location || !service || !message) {
+		throw new Error('Missing required fields');
+	}
+
 	const transporter = nodemailer.createTransport({
-		service: process.env.SMTP_HOST,
+		host: process.env.SMTP_HOST ?? '',
+		port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
 		auth: {
-			user: process.env.SMTP_USER,
-			pass: process.env.SMTP_PASS,
+			user: process.env.SMTP_USER ?? '',
+			pass: process.env.SMTP_PASS ?? '',
+		},
+		tls: {
+			rejectUnauthorized: false,
 		},
 	});
 
-  const mailOptions = {
-    from: process.env.SMTP_USER,
-    to: process.env.SMTP_USER,
-    subject: 
-  }
-	// From - me (.env)
-	// Text -
-	// To - me (.env)
-	// Subject - A customer would like to schedule ______ service with you
-	// HTML?
-	// 	- Users given name & family name
-	// - Users Tel
-	//  - Users Email
-	//  - Location
-	//  - Service requested
-	//  - User Message
-};
+	const mailOptions = {
+		from: process.env.SMTP_USER ?? '',
+		to: process.env.SMTP_USER ?? '',
+		subject: `A customer would like to schedule ${service} service with you`,
+		text: `Customer: ${givenName} ${familyName} /n Phone: ${tel} /n Email: ${email} /n Location: ${location} /n Service: ${service} /n Message: ${message}`,
+	};
 
-main().catch(console.error);
+	try {
+		const email = await transporter.sendMail(mailOptions);
+
+		console.log('Email:', email);
+
+		if (email) {
+			console.log('Email sent:', email);
+		}
+
+		if (!email) {
+			throw new Error('Error sending email');
+		}
+
+		return email;
+	} catch (error) {
+		console.error(error);
+		throw new Error('Error sending email');
+	}
+};

@@ -52,6 +52,7 @@ import { comparePassword, hashPassword } from './utils/helpers';
 import Invoice from './models/Invoice';
 import scrape from './lib/thumbtack_scraper';
 import { Types } from 'mongoose';
+import { sendScheduleServiceEmail } from './lib/nodemailer';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -1278,14 +1279,24 @@ const resolvers: Resolvers = {
 			}
 		},
 		sendScheduleServiceMessage: async (_: {}, args: MutationSendScheduleServiceMessageArgs, __: any) => {
-			const { givenName, familyName, tel, email, location, service, message } = args.input;
-
-			if (!givenName || !familyName || !tel || !email || !location || !service || !message) {
+			// const { givenName, familyName, tel, email, location, service, message } = args.input;
+			const messageContent = args.input;
+			console.log('sending email')
+			if (!messageContent.givenName || !messageContent.familyName || !messageContent.tel || !messageContent.email || !messageContent.location || !messageContent.service || !messageContent.message) {
 				throw new Error('All fields must be filled to send message');
 			}
 
+
 			try {
+				console.log('messageContent', messageContent);
 				// send email with nodemailer
+				const sentMessage = await sendScheduleServiceEmail(messageContent);
+
+				if (!sentMessage) {
+					throw new Error('Could not send message');
+				}
+
+				console.log('sentMessage', sentMessage);
 
 				// if success
 				// return '200 ok'
