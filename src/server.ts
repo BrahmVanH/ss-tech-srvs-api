@@ -27,6 +27,7 @@ const requestHandler = handlers.createAPIGatewayProxyEventV2RequestHandler();
 const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (event) => {
 	const origin = event.headers.origin;
 	if (origin && allowedOrigins.includes(origin)) {
+		console.log("origin allowed", origin);
 		return (result) => {
 			result.headers = {
 				...result.headers,
@@ -36,6 +37,7 @@ const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (ev
 			return Promise.resolve();
 		};
 	} else {
+		
 		return (result) => {
 			result.statusCode = 403;
 			result.body = 'Origin not allowed' + origin;
