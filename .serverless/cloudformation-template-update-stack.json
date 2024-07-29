@@ -162,7 +162,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/south-shore-tech-svcs-api/dev/1720213287815-2024-07-05T21:01:27.815Z/south-shore-tech-svcs-api.zip"
+          "S3Key": "serverless/south-shore-tech-svcs-api/dev/1720214390232-2024-07-05T21:19:50.232Z/south-shore-tech-svcs-api.zip"
         },
         "Handler": "lambda/dist/server.handler",
         "Runtime": "nodejs16.x",
@@ -180,14 +180,14 @@
         "GraphqlLogGroup"
       ]
     },
-    "GraphqlLambdaVersionILPrNvGxJkEO0MT1ZMI42aGM4SaRper2B0As8wzcA": {
+    "GraphqlLambdaVersiondigoUqLKfCwmIgkZGXLnw2jZ7u4akCOgH3x3XkQP9g": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GraphqlLambdaFunction"
         },
-        "CodeSha256": "m7NZWqxWiJjK0ozo9AZw0CsbYZFGMCqqguYYiY1RcO4="
+        "CodeSha256": "gGJiVmqlyKlXu5FBQYDnpChP1oETF+TgPHROJPHCq2A="
       }
     },
     "HttpApi": {
@@ -338,7 +338,7 @@
     "GraphqlLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GraphqlLambdaVersionILPrNvGxJkEO0MT1ZMI42aGM4SaRper2B0As8wzcA"
+        "Ref": "GraphqlLambdaVersiondigoUqLKfCwmIgkZGXLnw2jZ7u4akCOgH3x3XkQP9g"
       },
       "Export": {
         "Name": "sls-south-shore-tech-svcs-api-dev-GraphqlLambdaFunctionQualifiedArn"

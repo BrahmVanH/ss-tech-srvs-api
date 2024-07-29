@@ -1281,11 +1281,10 @@ const resolvers: Resolvers = {
 		sendScheduleServiceMessage: async (_: {}, args: MutationSendScheduleServiceMessageArgs, __: any) => {
 			// const { givenName, familyName, tel, email, location, service, message } = args.input;
 			const messageContent = args.input;
-			console.log('sending email')
+			console.log('sending email');
 			if (!messageContent.givenName || !messageContent.familyName || !messageContent.tel || !messageContent.email || !messageContent.location || !messageContent.service || !messageContent.message) {
 				throw new Error('All fields must be filled to send message');
 			}
-
 
 			try {
 				console.log('messageContent', messageContent);
@@ -1293,6 +1292,7 @@ const resolvers: Resolvers = {
 				const sentMessage = await sendScheduleServiceEmail(messageContent);
 
 				if (!sentMessage) {
+					return '500 error';
 					throw new Error('Could not send message');
 				}
 
@@ -1303,7 +1303,7 @@ const resolvers: Resolvers = {
 				// else
 				// return '500 error'
 
-				return 'butts';
+				return '200 ok';
 			} catch (err: any) {
 				throw new Error('Error in sending message: ' + err.message);
 			}
