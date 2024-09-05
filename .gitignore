@@ -34,3 +34,4 @@ graphql.schema.json
 codegen.ts
 
 src/seed
+src/dist
