@@ -37,6 +37,31 @@ const invoiceSchema: Schema<Invoice> = new Schema<Invoice>({
 		type: Boolean,
 		required: true,
 	},
+	materialsCost: {
+		type: Number,
+		required: true,
+	},
+	materialsCostDescription: {
+		type: String,
+		required: true,
+	},
+	laborItems: [
+		{
+			laborCost: {
+				type: Number,
+				required: true,
+			},
+			laborCostDescription: {
+				type: String,
+				required: true,
+			},
+		},
+	],
+
+	comments: {
+		type: String,
+		required: true,
+	},
 });
 
 const Invoice = model<Invoice>('Invoice', invoiceSchema);

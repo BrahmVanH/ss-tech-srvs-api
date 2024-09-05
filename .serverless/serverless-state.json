@@ -177,7 +177,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/south-shore-tech-svcs-api/dev/1720214390232-2024-07-05T21:19:50.232Z/south-shore-tech-svcs-api.zip"
+                "S3Key": "serverless/south-shore-tech-svcs-api/dev/1722290150747-2024-07-29T21:55:50.747Z/south-shore-tech-svcs-api.zip"
               },
               "Handler": "lambda/dist/server.handler",
               "Runtime": "nodejs16.x",
@@ -195,14 +195,14 @@
               "GraphqlLogGroup"
             ]
           },
-          "GraphqlLambdaVersiondigoUqLKfCwmIgkZGXLnw2jZ7u4akCOgH3x3XkQP9g": {
+          "GraphqlLambdaVersionImD0PP9PNvvbqwSwHEl6BC7Q2O48y5MWCZVKBbaTNU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GraphqlLambdaFunction"
               },
-              "CodeSha256": "gGJiVmqlyKlXu5FBQYDnpChP1oETF+TgPHROJPHCq2A="
+              "CodeSha256": "IvLOfG4LIisQSEamatqBcLSw7v0qE3/0XBrXR4w690g="
             }
           },
           "HttpApi": {
@@ -350,7 +350,7 @@
           "GraphqlLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GraphqlLambdaVersiondigoUqLKfCwmIgkZGXLnw2jZ7u4akCOgH3x3XkQP9g"
+              "Ref": "GraphqlLambdaVersionImD0PP9PNvvbqwSwHEl6BC7Q2O48y5MWCZVKBbaTNU"
             },
             "Export": {
               "Name": "sls-south-shore-tech-svcs-api-dev-GraphqlLambdaFunctionQualifiedArn"
@@ -514,7 +514,7 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "GraphqlLambdaVersiondigoUqLKfCwmIgkZGXLnw2jZ7u4akCOgH3x3XkQP9g"
+        "versionLogicalId": "GraphqlLambdaVersionImD0PP9PNvvbqwSwHEl6BC7Q2O48y5MWCZVKBbaTNU"
       }
     },
     "configValidationMode": "warn",
@@ -540,7 +540,7 @@
         ],
         "artifactsS3KeyDirname": "serverless/south-shore-tech-svcs-api/dev/code-artifacts",
         "artifact": "C:\\Users\\Brahm\\Dev-Stuff\\Apps\\south_shore_technical_services\\_mechanical_services\\lambda_function\\.serverless\\south-shore-tech-svcs-api.zip",
-        "artifactDirectoryName": "serverless/south-shore-tech-svcs-api/dev/1720214390232-2024-07-05T21:19:50.232Z"
+        "artifactDirectoryName": "serverless/south-shore-tech-svcs-api/dev/1722290150747-2024-07-29T21:55:50.747Z"
       },
       "plugins": {
         "$ref": "$[\"service\"][\"plugins\"]"
@@ -554,7 +554,7 @@
     "artifact": "C:\\Users\\Brahm\\Dev-Stuff\\Apps\\south_shore_technical_services\\_mechanical_services\\lambda_function\\.serverless\\south-shore-tech-svcs-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/south-shore-tech-svcs-api/dev/1720214390232-2024-07-05T21:19:50.232Z",
+    "artifactDirectoryName": "serverless/south-shore-tech-svcs-api/dev/1722290150747-2024-07-29T21:55:50.747Z",
     "artifact": "south-shore-tech-svcs-api.zip"
   }
 }

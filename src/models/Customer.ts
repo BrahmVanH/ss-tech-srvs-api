@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { Customer } from '../generated/graphql';
+import { AddressSchema } from './Property';
 
 const customerSchema: Schema<Customer> = new Schema<Customer>(
 	{
@@ -9,6 +10,10 @@ const customerSchema: Schema<Customer> = new Schema<Customer>(
 		},
 		lastName: {
 			type: String,
+			required: true,
+		},
+		address: {
+			type: AddressSchema,
 			required: true,
 		},
 		email: {

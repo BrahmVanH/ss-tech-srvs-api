@@ -91,6 +91,7 @@ type Customer {
 	createdAt: String!
 	firstName: String!
 	lastName: String!
+	address: Address!
 	email: String!
 	phone: String!
 	businessName: String!
@@ -107,6 +108,7 @@ input CreateCustomerInput {
 	email: String
 	phone: String!
 	businessName: String!
+	address: AddressInput!
 }
 
 
@@ -118,6 +120,11 @@ input UpdateCustomerFirstNameInput {
 input UpdateCustomerLastNameInput {
 	customerId: ID!
 	lastName: String!
+}
+
+input UpdateCustomerAddressInput {
+	customerId: ID!
+	address: AddressInput!
 }
 
 input UpdateCustomerEmailInput {
@@ -161,7 +168,20 @@ type Invoice {
 	total: Float!
 	charged: Boolean!
 	paid: Boolean!
+	materialsCost: Float!
+	materialsCostDescription: String!
+	comments: String!
+	laborItems: [LaborItem]!
+	
+
 }
+
+type LaborItem {
+	laborCost: Float!
+	laborCostDescription: String!
+}
+
+
 
 
 
@@ -174,6 +194,11 @@ input CreateInvoiceInput {
 	total: Float
 	charged: Boolean!
 	paid: Boolean!
+	materialsCost: Float!
+	materialsCostDescription: String!
+	comments: String!
+	laborCost: Float!
+	laborCostDescription: String!
 }
 
 input UpdateInvoiceDateInput {
@@ -209,6 +234,35 @@ input UpdateInvoicePaidInput {
 input UpdateInvoiceQuoteInput {
 	invoiceId: ID!
 	quote: Float!
+}
+
+input UpdateInvoiceMaterialsCostInput {
+	invoiceId: ID!
+	updatedCost: Float! 
+}
+
+input UpdateInvoiceMaterialsCostDescriptionInput {
+	invoiceId: ID!
+	description: String!
+}
+
+input UpdateInvoiceCommentsInput {
+	invoiceId: ID!
+	comments: String!
+}
+
+input UpdateInvoiceLaborCostInput {
+	invoiceId: ID!
+	updatedCost: Float!
+}
+
+input UpdateInvoiceLaborCostDescriptionInput {
+	invoiceId: ID!
+	description: String!
+}
+
+input CreateInvoicePdfInput {
+	invoiceId: ID!
 }
 
 input RemoveInvoiceInput {
@@ -494,6 +548,7 @@ type Mutation {
 	createCustomer(input: CreateCustomerInput!): Customer!
 	updateCustomerFirstName(input: UpdateCustomerFirstNameInput!): Customer!
 	updateCustomerLastName(input: UpdateCustomerLastNameInput!): Customer!
+	updateCustomerAddress(input: UpdateCustomerAddressInput!): Customer!
 	updateCustomerEmail(input: UpdateCustomerEmailInput!): Customer!
 	updateCustomerPhone(input: UpdateCustomerPhoneInput!): Customer!
 	updateCustomerBusinessName(input: UpdateCustomerBusinessNameInput!): Customer!
@@ -535,6 +590,13 @@ type Mutation {
 	updateInvoiceTotal(input: UpdateInvoiceTotalInput!): Invoice!
 	updateInvoiceCharged(input: UpdateInvoiceChargedInput!): Invoice!
 	updateInvoicePaid(input: UpdateInvoicePaidInput!): Invoice!
+	updateInvoiceMaterialsCost(input: UpdateInvoiceMaterialsCostInput!): Invoice!
+	updateInvoiceMaterialsCostDescription(input: UpdateInvoiceMaterialsCostDescriptionInput!): Invoice!
+	updateInvoiceLaborCost(input: UpdateInvoiceLaborCostInput!): Invoice!
+	updateInvoiceLaborCostDescription(input: UpdateInvoiceLaborCostDescriptionInput!): Invoice!
+	updateInvoiceComments(input: UpdateInvoiceCommentsInput!): Invoice!
+	createInvoicePdf(input: CreateInvoicePdfInput!): Invoice!
+	sendInvoiceEmail(input: CreateInvoicePdfInput!): Invoice!
 	deleteInvoice(input: RemoveInvoiceInput!): Invoice!
 
 	# Schedule Service Mutations

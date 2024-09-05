@@ -46,13 +46,17 @@ import {
 	MutationUpdateCustomerPropertiesArgs,
 	MutationUpdateWorkOrderCompletedArgs,
 	MutationSendScheduleServiceMessageArgs,
+	MutationUpdateCustomerAddressArgs,
+	MutationCreateInvoicePdfArgs,
+	MutationSendInvoiceEmailArgs,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
 import Invoice from './models/Invoice';
 import scrape from './lib/thumbtack_scraper';
 import { Types } from 'mongoose';
-import { sendScheduleServiceEmail } from './lib/nodemailer';
+import { emailInvoiceToCustomer, sendScheduleServiceEmail } from './lib/nodemailer';
+import createInvoicePdf from './lib/pdfkit';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -617,6 +621,26 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating customer last name: ' + err.message);
 			}
 		},
+		updateCustomerAddress: async (_: {}, args: MutationUpdateCustomerAddressArgs, __: any) => {
+			const { customerId, address } = args.input;
+			if (!customerId || !address) {
+				throw new Error('customerId and address fields must be filled to update customer address');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedCustomer = await Customer.findOneAndUpdate({ _id: customerId }, { address }, { new: true });
+
+				if (!updatedCustomer) {
+					throw new Error('Could not update customer address');
+				}
+
+				return updatedCustomer;
+			} catch (err: any) {
+				throw new Error('Error in updating customer address: ' + err.message);
+			}
+		},
 		updateCustomerBusinessName: async (_: {}, args: MutationUpdateCustomerBusinessNameArgs, __: any) => {
 			const { customerId, businessName } = args.input;
 			if (!customerId || !businessName) {
@@ -1102,6 +1126,7 @@ const resolvers: Resolvers = {
 				throw new Error('Error in deleting work order: ' + err.message);
 			}
 		},
+
 		createInvoice: async (_: {}, args: MutationCreateInvoiceArgs, __: any) => {
 			const invoice = args.input;
 			if (!invoice) {
@@ -1111,7 +1136,10 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const newInvoice = await Invoice.create({ ...invoice, workOrders: invoice.workOrders ?? [], quote: invoice.quote ?? 0, total: invoice.total ?? 0 });
+
+				const invoiceNumber = (await Invoice.countDocuments()) + 217;
+
+				const newInvoice = await Invoice.create({ ...invoice, invoiceNumber, workOrders: invoice.workOrders ?? [], quote: invoice.quote ?? 0, total: invoice.total ?? 0 });
 
 				if (!newInvoice) {
 					throw new Error('Could not create invoice');
@@ -1119,7 +1147,7 @@ const resolvers: Resolvers = {
 
 				invoice.workOrders?.forEach(async (workOrderId) => {
 					try {
-						const workOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { $push: { invoices: new Types.ObjectId(newInvoice._id) } });
+						const workOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { $push: { invoices: new Types.ObjectId(newInvoice._id) } }, { $set: { total: invoice.total } });
 						if (!workOrder) {
 							throw new Error('Could not update work order with new invoice');
 						}
@@ -1258,6 +1286,101 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating invoice paid: ' + err.message);
 			}
 		},
+		// updateInvoiceItems: async (_: {}, args: MutationUpdateInvoiceItemsArgs, __: any) => {
+		// 	const { invoiceId, items } = args.input;
+		// 	if (!invoiceId || !items) {
+		// 		throw new Error('invoiceId and items fields must be filled to update invoice items');
+		// 	}
+
+		// 	try {
+		// 		await connectToDb();
+
+		// 		const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { items }, { new: true });
+
+		// 		if (!updatedInvoice) {
+		// 			throw new Error('Could not update invoice items');
+		// 		}
+
+		// 		return updatedInvoice;
+		// 	} catch (err: any) {
+		// 		throw new Error('Error in updating invoice items: ' + err.message);
+		// 	}
+		// },
+		createInvoicePdf: async (_: {}, args: MutationCreateInvoicePdfArgs, __: any) => {
+			const { invoiceId } = args.input;
+			if (!invoiceId) {
+				throw new Error('No invoice ID was presented for creating invoice PDF');
+			}
+
+			try {
+				await connectToDb();
+
+				const invoice = await Invoice.findOne({ _id: invoiceId });
+
+				if (!invoice) {
+					throw new Error('Could not find invoice');
+				}
+
+				const customer = await Customer.findOne({ _id: invoice.customerId });
+
+				if (!customer) {
+					throw new Error('Could not find customer');
+				}
+
+				const workOrders = await WorkOrder.find({ _id: { $in: invoice.workOrders } });
+
+				if (!workOrders) {
+					throw new Error('Could not find work orders');
+				}
+
+				const pdfPath = createInvoicePdf(invoice);
+
+				// To Do: upload pdf to s3, return pdf to client
+
+				return invoice;
+			} catch (err: any) {
+				throw new Error('Error in creating invoice PDF: ' + err.message);
+			}
+		},
+
+		sendInvoiceEmail: async (_: {}, args: MutationSendInvoiceEmailArgs, __: any) => {
+			const { invoiceId } = args.input;
+			if (!invoiceId) {
+				throw new Error('No invoice ID was presented for sending invoice email');
+			}
+			try {
+				await connectToDb();
+
+				const invoice = await Invoice.findOne({ _id: invoiceId });
+
+				if (!invoice) {
+					throw new Error('Could not find invoice');
+				}
+
+				const customer = await Customer.findOne({ _id: invoice.customerId });
+
+				if (!customer) {
+					throw new Error('Could not find customer');
+				}
+
+				const invoicePath = createInvoicePdf(invoice);
+
+				if (!invoicePath) {
+					throw new Error('Could not create invoice PDF');
+				}
+
+				const invoicePdf = await emailInvoiceToCustomer(invoicePath, customer.email);
+
+				if (!invoicePdf) {
+					throw new Error('Could not send invoice email');
+				}
+
+				return invoice;
+			} catch (err: any) {
+				throw new Error('Error in sending invoice email: ' + err.message);
+			}
+		},
+
 		deleteInvoice: async (_: {}, args: MutationDeleteInvoiceArgs, __: any) => {
 			const { invoiceId } = args.input;
 			if (!invoiceId) {

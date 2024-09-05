@@ -1,7 +1,7 @@
 import { model, Schema, Types } from 'mongoose';
 import { Address, Property } from '../generated/graphql';
 
-const AddressSchema: Schema<Address> = new Schema<Address>({
+export const AddressSchema: Schema<Address> = new Schema<Address>({
 	street: {
 		type: String,
 		required: true,
