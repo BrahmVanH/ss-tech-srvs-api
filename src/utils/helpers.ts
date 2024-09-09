@@ -15,7 +15,6 @@ export const comparePassword = async (enteredPassword: string, userPassword: str
 	if (!enteredPassword || !userPassword) {
 		throw new Error('passwords are missing');
 	}
-	console.log('comparing passwords');
 	try {
 		return await bcrypt.compare(enteredPassword, userPassword);
 	} catch (err) {

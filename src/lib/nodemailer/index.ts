@@ -44,7 +44,6 @@ export const sendScheduleServiceEmail = async (messageContent: ScheduleServiceMe
 	try {
 		const email = await transporter.sendMail(mailOptions);
 
-		console.log('Email:', email);
 
 		if (email) {
 			console.log('Email sent:', email);

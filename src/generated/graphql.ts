@@ -28,9 +28,11 @@ export type Address = {
   _id: Scalars['ID']['output'];
   city: Scalars['String']['output'];
   country: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['String']['output']>;
   state: Scalars['String']['output'];
   street: Scalars['String']['output'];
   unit: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['String']['output']>;
   zip: Scalars['String']['output'];
 };
 
@@ -63,9 +65,8 @@ export type CreateInvoiceInput = {
   comments: Scalars['String']['input'];
   customerId: Scalars['ID']['input'];
   date: Scalars['String']['input'];
-  invoiceNumber: Scalars['String']['input'];
-  laborCost: Scalars['Float']['input'];
-  laborCostDescription: Scalars['String']['input'];
+  invoiceNumber?: InputMaybe<Scalars['String']['input']>;
+  laborItems: Array<LaborItemInput>;
   materialsCost: Scalars['Float']['input'];
   materialsCostDescription: Scalars['String']['input'];
   paid: Scalars['Boolean']['input'];
@@ -101,6 +102,7 @@ export type CreateWorkOrderInput = {
   customerId: Scalars['ID']['input'];
   date: Scalars['String']['input'];
   description: Scalars['String']['input'];
+  laborItems?: InputMaybe<Array<InputMaybe<LaborItemInput>>>;
   paid: Scalars['Boolean']['input'];
   propertyId: Scalars['ID']['input'];
   quote?: InputMaybe<Scalars['Float']['input']>;
@@ -113,13 +115,14 @@ export type Customer = {
   _id: Scalars['ID']['output'];
   address: Address;
   businessName: Scalars['String']['output'];
-  createdAt: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   invoices: Array<Maybe<Invoice>>;
   lastName: Scalars['String']['output'];
   phone: Scalars['String']['output'];
   properties: Array<Maybe<Property>>;
+  updatedAt?: Maybe<Scalars['String']['output']>;
   workOrders: Array<Maybe<WorkOrder>>;
 };
 
@@ -138,6 +141,7 @@ export type Invoice = {
   _id: Scalars['ID']['output'];
   charged: Scalars['Boolean']['output'];
   comments: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['String']['output']>;
   customerId: Customer;
   date: Scalars['String']['output'];
   invoiceNumber: Scalars['String']['output'];
@@ -147,6 +151,7 @@ export type Invoice = {
   paid: Scalars['Boolean']['output'];
   quote: Scalars['Float']['output'];
   total: Scalars['Float']['output'];
+  updatedAt?: Maybe<Scalars['String']['output']>;
   workOrders: Array<Maybe<WorkOrder>>;
 };
 
@@ -154,6 +159,11 @@ export type LaborItem = {
   __typename?: 'LaborItem';
   laborCost: Scalars['Float']['output'];
   laborCostDescription: Scalars['String']['output'];
+};
+
+export type LaborItemInput = {
+  laborCost: Scalars['Float']['input'];
+  laborCostDescription: Scalars['String']['input'];
 };
 
 export type LoginUserInput = {
@@ -214,6 +224,7 @@ export type Mutation = {
   updateWorkOrderCustomerId: WorkOrder;
   updateWorkOrderDate: WorkOrder;
   updateWorkOrderDescription: WorkOrder;
+  updateWorkOrderLaborItems: WorkOrder;
   updateWorkOrderPaid: WorkOrder;
   updateWorkOrderPropertyId: WorkOrder;
   updateWorkOrderQuote: WorkOrder;
@@ -477,6 +488,11 @@ export type MutationUpdateWorkOrderDescriptionArgs = {
 };
 
 
+export type MutationUpdateWorkOrderLaborItemsArgs = {
+  input: UpdateWorkOrderLaborItemsInput;
+};
+
+
 export type MutationUpdateWorkOrderPaidArgs = {
   input: UpdateWorkOrderPaidInput;
 };
@@ -505,10 +521,12 @@ export type Property = {
   __typename?: 'Property';
   _id: Scalars['ID']['output'];
   agent: Customer;
+  createdAt?: Maybe<Scalars['String']['output']>;
   propertyAddress: Address;
   propertyDescription: Scalars['String']['output'];
   propertyName: Scalars['String']['output'];
   s3FolderKey: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -829,6 +847,11 @@ export type UpdateWorkOrderInvoicesInput = {
   workOrderId: Scalars['ID']['input'];
 };
 
+export type UpdateWorkOrderLaborItemsInput = {
+  laborItems: Array<LaborItemInput>;
+  workOrderId: Scalars['ID']['input'];
+};
+
 export type UpdateWorkOrderPaidInput = {
   paid: Scalars['Boolean']['input'];
   workOrderId: Scalars['ID']['input'];
@@ -857,6 +880,7 @@ export type UpdateWorkOrderTypeInput = {
 export type User = {
   __typename?: 'User';
   _id?: Maybe<Scalars['ID']['output']>;
+  createdAt?: Maybe<Scalars['String']['output']>;
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
   password?: Maybe<Scalars['String']['output']>;
@@ -875,12 +899,14 @@ export type WorkOrder = {
   date: Scalars['String']['output'];
   description: Scalars['String']['output'];
   invoices: Array<Maybe<Invoice>>;
+  laborItems?: Maybe<Array<Maybe<LaborItem>>>;
   lastUpdated: Scalars['String']['output'];
   paid: Scalars['Boolean']['output'];
   propertyId: Property;
   quote: Scalars['Float']['output'];
   total: Scalars['Float']['output'];
   type: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['String']['output']>;
 };
 
 export type ImageObject = {
@@ -981,6 +1007,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Invoice: ResolverTypeWrapper<Invoice>;
   LaborItem: ResolverTypeWrapper<LaborItem>;
+  LaborItemInput: LaborItemInput;
   LoginUserInput: LoginUserInput;
   Mutation: ResolverTypeWrapper<{}>;
   Property: ResolverTypeWrapper<Property>;
@@ -1034,6 +1061,7 @@ export type ResolversTypes = {
   UpdateWorkOrderDateInput: UpdateWorkOrderDateInput;
   UpdateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
   UpdateWorkOrderInvoicesInput: UpdateWorkOrderInvoicesInput;
+  UpdateWorkOrderLaborItemsInput: UpdateWorkOrderLaborItemsInput;
   UpdateWorkOrderPaidInput: UpdateWorkOrderPaidInput;
   UpdateWorkOrderPropertyIdInput: UpdateWorkOrderPropertyIdInput;
   UpdateWorkOrderQuoteInput: UpdateWorkOrderQuoteInput;
@@ -1071,6 +1099,7 @@ export type ResolversParentTypes = {
   Int: Scalars['Int']['output'];
   Invoice: Invoice;
   LaborItem: LaborItem;
+  LaborItemInput: LaborItemInput;
   LoginUserInput: LoginUserInput;
   Mutation: {};
   Property: Property;
@@ -1124,6 +1153,7 @@ export type ResolversParentTypes = {
   UpdateWorkOrderDateInput: UpdateWorkOrderDateInput;
   UpdateWorkOrderDescriptionInput: UpdateWorkOrderDescriptionInput;
   UpdateWorkOrderInvoicesInput: UpdateWorkOrderInvoicesInput;
+  UpdateWorkOrderLaborItemsInput: UpdateWorkOrderLaborItemsInput;
   UpdateWorkOrderPaidInput: UpdateWorkOrderPaidInput;
   UpdateWorkOrderPropertyIdInput: UpdateWorkOrderPropertyIdInput;
   UpdateWorkOrderQuoteInput: UpdateWorkOrderQuoteInput;
@@ -1166,9 +1196,11 @@ export type AddressResolvers<ContextType = any, ParentType extends ResolversPare
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   city?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   country?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   state?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   street?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   zip?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1183,13 +1215,14 @@ export type CustomerResolvers<ContextType = any, ParentType extends ResolversPar
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   address?: Resolver<ResolversTypes['Address'], ParentType, ContextType>;
   businessName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   invoices?: Resolver<Array<Maybe<ResolversTypes['Invoice']>>, ParentType, ContextType>;
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   phone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   properties?: Resolver<Array<Maybe<ResolversTypes['Property']>>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   workOrders?: Resolver<Array<Maybe<ResolversTypes['WorkOrder']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1204,6 +1237,7 @@ export type InvoiceResolvers<ContextType = any, ParentType extends ResolversPare
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   charged?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   customerId?: Resolver<ResolversTypes['Customer'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   invoiceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1213,6 +1247,7 @@ export type InvoiceResolvers<ContextType = any, ParentType extends ResolversPare
   paid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   quote?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   total?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   workOrders?: Resolver<Array<Maybe<ResolversTypes['WorkOrder']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1275,6 +1310,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateWorkOrderCustomerId?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderCustomerIdArgs, 'input'>>;
   updateWorkOrderDate?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderDateArgs, 'input'>>;
   updateWorkOrderDescription?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderDescriptionArgs, 'input'>>;
+  updateWorkOrderLaborItems?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderLaborItemsArgs, 'input'>>;
   updateWorkOrderPaid?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderPaidArgs, 'input'>>;
   updateWorkOrderPropertyId?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderPropertyIdArgs, 'input'>>;
   updateWorkOrderQuote?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationUpdateWorkOrderQuoteArgs, 'input'>>;
@@ -1285,10 +1321,12 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 export type PropertyResolvers<ContextType = any, ParentType extends ResolversParentTypes['Property'] = ResolversParentTypes['Property']> = {
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   agent?: Resolver<ResolversTypes['Customer'], ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   propertyAddress?: Resolver<ResolversTypes['Address'], ParentType, ContextType>;
   propertyDescription?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   propertyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   s3FolderKey?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1341,6 +1379,7 @@ export type ThumbtackReviewRatingResolvers<ContextType = any, ParentType extends
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   _id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   password?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1359,12 +1398,14 @@ export type WorkOrderResolvers<ContextType = any, ParentType extends ResolversPa
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   invoices?: Resolver<Array<Maybe<ResolversTypes['Invoice']>>, ParentType, ContextType>;
+  laborItems?: Resolver<Maybe<Array<Maybe<ResolversTypes['LaborItem']>>>, ParentType, ContextType>;
   lastUpdated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   paid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   propertyId?: Resolver<ResolversTypes['Property'], ParentType, ContextType>;
   quote?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   total?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

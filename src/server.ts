@@ -27,7 +27,6 @@ const requestHandler = handlers.createAPIGatewayProxyEventV2RequestHandler();
 const corsMiddleware: middleware.MiddlewareFn<typeof requestHandler> = async (event) => {
 	const origin = event.headers.origin;
 	if (origin && allowedOrigins.includes(origin)) {
-		console.log('origin allowed', origin);
 		return (result) => {
 			result.headers = {
 				...result.headers,

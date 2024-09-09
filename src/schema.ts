@@ -26,6 +26,7 @@ input DeleteS3ObjectInput {
 
  type User {
 	_id: ID
+	createdAt: String
 	firstName: String!
 	lastName: String!
 	username: String!
@@ -88,7 +89,8 @@ input RemoveUserInput {
 
 type Customer {
 	_id: ID!
-	createdAt: String!
+	createdAt: String
+	updatedAt: String
 	firstName: String!
 	lastName: String!
 	address: Address!
@@ -161,6 +163,8 @@ input RemoveCustomerInput {
 type Invoice {
 	_id: ID!
 	invoiceNumber: String!
+	createdAt: String
+	updatedAt: String
 	date: String!
 	customerId: Customer!
 	workOrders: [WorkOrder]!
@@ -187,7 +191,7 @@ type LaborItem {
 
 input CreateInvoiceInput {
 	date: String!
-	invoiceNumber: String!
+	invoiceNumber: String
 	customerId: ID!
 	workOrders: [ID]
 	quote: Float
@@ -197,6 +201,10 @@ input CreateInvoiceInput {
 	materialsCost: Float!
 	materialsCostDescription: String!
 	comments: String!
+	laborItems: [LaborItemInput!]!
+}
+
+input LaborItemInput {
 	laborCost: Float!
 	laborCostDescription: String!
 }
@@ -276,6 +284,8 @@ input RemoveInvoiceInput {
 
 type Address {
 	_id: ID!
+	createdAt: String
+	updatedAt: String
 	street: String!
 	unit: String!
 	city: String!
@@ -298,6 +308,8 @@ input AddressInput {
 
 type Property {
 	_id: ID!
+	createdAt: String
+	updatedAt: String
 	propertyName: String!
 	propertyAddress: Address!
 	propertyDescription: String!
@@ -364,6 +376,8 @@ type WorkOrder {
 	charged: Boolean!
 	paid: Boolean!
 	comments: String!
+	updatedAt: String
+	laborItems: [LaborItem]
 	}
 
 
@@ -381,6 +395,7 @@ input CreateWorkOrderInput {
 	charged: Boolean!
 	paid: Boolean!
 	comments: String
+	laborItems: [LaborItemInput]
 }
 
 input UpdateWorkOrderDateInput {
@@ -448,7 +463,10 @@ input UpdateWorkOrderCommentsInput {
 	comments: String!
 }
 
-
+input UpdateWorkOrderLaborItemsInput {
+	workOrderId: ID!
+	laborItems: [LaborItemInput!]!
+}
 
 input RemoveWorkOrderInput {
 	workOrderId: ID!
@@ -579,6 +597,7 @@ type Mutation {
 	updateWorkOrderCharged(input: UpdateWorkOrderChargedInput!): WorkOrder!
 	updateWorkOrderPaid(input: UpdateWorkOrderPaidInput!): WorkOrder!
 	updateWorkOrderComments(input: UpdateWorkOrderCommentsInput!): WorkOrder!
+	updateWorkOrderLaborItems(input: UpdateWorkOrderLaborItemsInput!): WorkOrder!
 	deleteWorkOrder(input: RemoveWorkOrderInput!): WorkOrder!
 
 	# Invoice Mutations

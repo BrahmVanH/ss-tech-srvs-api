@@ -49,6 +49,7 @@ import {
 	MutationUpdateCustomerAddressArgs,
 	MutationCreateInvoicePdfArgs,
 	MutationSendInvoiceEmailArgs,
+	MutationUpdateWorkOrderLaborItemsArgs,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
@@ -84,7 +85,6 @@ const resolvers: Resolvers = {
 				await connectToDb();
 
 				const customers = await Customer.find().populate('workOrders').populate('invoices').populate('properties');
-				console.log('customers', customers);
 				if (!customers) {
 					throw new Error('Error fetching all customers from database');
 				}
@@ -495,8 +495,6 @@ const resolvers: Resolvers = {
 			}
 		},
 		loginUser: async (_: {}, args: MutationLoginUserArgs, __: any) => {
-			console.log('args', args);
-
 			const { username, userPassword: enteredPassword } = args.input;
 
 			try {
@@ -512,8 +510,6 @@ const resolvers: Resolvers = {
 					throw new Error('Could not find user');
 				}
 
-				console.log('user', user);
-
 				const existingPasswordIsCorrect = await comparePassword(enteredPassword, user.password as string);
 
 				if (!existingPasswordIsCorrect) {
@@ -521,8 +517,6 @@ const resolvers: Resolvers = {
 				}
 
 				const token = signToken(user);
-				console.log('token', token);
-				console.log('user', user);
 				return { token, user };
 			} catch (err: any) {
 				throw new Error('Error in logging in user: ' + err.message);
@@ -1106,6 +1100,26 @@ const resolvers: Resolvers = {
 				throw new Error('Error in updating work order comments: ' + err.message);
 			}
 		},
+		updateWorkOrderLaborItems: async (_: {}, args: MutationUpdateWorkOrderLaborItemsArgs, __: any) => {
+			const { workOrderId, laborItems } = args.input;
+			if (!workOrderId || !laborItems) {
+				throw new Error('workOrderId and laborItems fields must be filled to update work order labor items');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedWorkOrder = await WorkOrder.findOneAndUpdate({ _id: workOrderId }, { laborItems, lastUpdated: new Date() }, { new: true });
+
+				if (!updatedWorkOrder) {
+					throw new Error('Could not update work order labor items');
+				}
+
+				return updatedWorkOrder;
+			} catch (err: any) {
+				throw new Error('Error in updating work order labor items: ' + err.message);
+			}
+		},
 		deleteWorkOrder: async (_: {}, args: MutationDeleteWorkOrderArgs, __: any) => {
 			const { workOrderId } = args.input;
 			if (!workOrderId) {
@@ -1135,7 +1149,6 @@ const resolvers: Resolvers = {
 
 			try {
 				await connectToDb();
-
 
 				const invoiceNumber = (await Invoice.countDocuments()) + 217;
 
@@ -1258,7 +1271,7 @@ const resolvers: Resolvers = {
 				const updatedInvoice = await Invoice.findOneAndUpdate({ _id: invoiceId }, { total }, { new: true });
 
 				if (!updatedInvoice) {
-					throw new Error('Could not update invoice total');
+					throw new Error('Could not find invoice with that ID.');
 				}
 
 				return updatedInvoice;
@@ -1404,13 +1417,11 @@ const resolvers: Resolvers = {
 		sendScheduleServiceMessage: async (_: {}, args: MutationSendScheduleServiceMessageArgs, __: any) => {
 			// const { givenName, familyName, tel, email, location, service, message } = args.input;
 			const messageContent = args.input;
-			console.log('sending email');
 			if (!messageContent.givenName || !messageContent.familyName || !messageContent.tel || !messageContent.email || !messageContent.location || !messageContent.service || !messageContent.message) {
 				throw new Error('All fields must be filled to send message');
 			}
 
 			try {
-				console.log('messageContent', messageContent);
 				// send email with nodemailer
 				const sentMessage = await sendScheduleServiceEmail(messageContent);
 
@@ -1418,8 +1429,6 @@ const resolvers: Resolvers = {
 					return '500 error';
 					throw new Error('Could not send message');
 				}
-
-				console.log('sentMessage', sentMessage);
 
 				// if success
 				// return '200 ok'

@@ -122,12 +122,6 @@ function generateInvoiceTable(doc: PDFKit.PDFDocument, invoice: Invoice) {
 	const items = [...laborCostItems, materialsCostItem];
 	const totalCost = items.reduce((acc, item) => acc + item.cost, 0);
 
-	// turn above block back into for loop
-	if (items.length > 0) {
-		console.log(items);
-	} else {
-		console.log('no items');
-	}
 
 	if (items.length > 0) {
 		for (i = 0; i < items.length; i++) {
