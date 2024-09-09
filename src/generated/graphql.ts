@@ -63,7 +63,9 @@ export type CreateCustomerInput = {
 
 export type CreateExpenseInput = {
   amount: Scalars['Float']['input'];
+  category: Scalars['String']['input'];
   description: Scalars['String']['input'];
+  payee: Scalars['String']['input'];
 };
 
 export type CreateInvoiceInput = {
@@ -150,8 +152,10 @@ export type Expense = {
   __typename?: 'Expense';
   _id: Scalars['ID']['output'];
   amount: Scalars['Float']['output'];
+  category: Scalars['String']['output'];
   date: Scalars['String']['output'];
   description: Scalars['String']['output'];
+  payee: Scalars['String']['output'];
 };
 
 export type Invoice = {
@@ -216,8 +220,10 @@ export type Mutation = {
   updateCustomerPhone: Customer;
   updateCustomerProperties: Customer;
   updateExpenseAmount: Expense;
+  updateExpenseCategory: Expense;
   updateExpenseDate: Expense;
   updateExpenseDescription: Expense;
+  updateExpensePayee: Expense;
   updateInvoiceCharged: Invoice;
   updateInvoiceComments: Invoice;
   updateInvoiceCustomerId: Invoice;
@@ -381,6 +387,11 @@ export type MutationUpdateExpenseAmountArgs = {
 };
 
 
+export type MutationUpdateExpenseCategoryArgs = {
+  input: UpdateExpenseCategoryInput;
+};
+
+
 export type MutationUpdateExpenseDateArgs = {
   input: UpdateExpenseDateInput;
 };
@@ -388,6 +399,11 @@ export type MutationUpdateExpenseDateArgs = {
 
 export type MutationUpdateExpenseDescriptionArgs = {
   input: UpdateExpenseDescriptionInput;
+};
+
+
+export type MutationUpdateExpensePayeeArgs = {
+  input: UpdateExpensePayeeInput;
 };
 
 
@@ -579,6 +595,8 @@ export type Property = {
 
 export type Query = {
   __typename?: 'Query';
+  GetAnnualExpenseCsv: Scalars['Buffer']['output'];
+  GetAnnualIncomeCsv: Scalars['Buffer']['output'];
   getAllUsers?: Maybe<Array<User>>;
   getPresignedS3Url: Scalars['String']['output'];
   queryCustomerById: Customer;
@@ -755,6 +773,11 @@ export type UpdateExpenseAmountInput = {
   expenseId: Scalars['ID']['input'];
 };
 
+export type UpdateExpenseCategoryInput = {
+  category: Scalars['String']['input'];
+  expenseId: Scalars['ID']['input'];
+};
+
 export type UpdateExpenseDateInput = {
   date: Scalars['String']['input'];
   expenseId: Scalars['ID']['input'];
@@ -763,6 +786,11 @@ export type UpdateExpenseDateInput = {
 export type UpdateExpenseDescriptionInput = {
   description: Scalars['String']['input'];
   expenseId: Scalars['ID']['input'];
+};
+
+export type UpdateExpensePayeeInput = {
+  expenseId: Scalars['ID']['input'];
+  payee: Scalars['String']['input'];
 };
 
 export type UpdateInvoiceChargedInput = {
@@ -1106,8 +1134,10 @@ export type ResolversTypes = {
   UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
   UpdateCustomerPropertiesInput: UpdateCustomerPropertiesInput;
   UpdateExpenseAmountInput: UpdateExpenseAmountInput;
+  UpdateExpenseCategoryInput: UpdateExpenseCategoryInput;
   UpdateExpenseDateInput: UpdateExpenseDateInput;
   UpdateExpenseDescriptionInput: UpdateExpenseDescriptionInput;
+  UpdateExpensePayeeInput: UpdateExpensePayeeInput;
   UpdateInvoiceChargedInput: UpdateInvoiceChargedInput;
   UpdateInvoiceCommentsInput: UpdateInvoiceCommentsInput;
   UpdateInvoiceCustomerIdInput: UpdateInvoiceCustomerIdInput;
@@ -1205,8 +1235,10 @@ export type ResolversParentTypes = {
   UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
   UpdateCustomerPropertiesInput: UpdateCustomerPropertiesInput;
   UpdateExpenseAmountInput: UpdateExpenseAmountInput;
+  UpdateExpenseCategoryInput: UpdateExpenseCategoryInput;
   UpdateExpenseDateInput: UpdateExpenseDateInput;
   UpdateExpenseDescriptionInput: UpdateExpenseDescriptionInput;
+  UpdateExpensePayeeInput: UpdateExpensePayeeInput;
   UpdateInvoiceChargedInput: UpdateInvoiceChargedInput;
   UpdateInvoiceCommentsInput: UpdateInvoiceCommentsInput;
   UpdateInvoiceCustomerIdInput: UpdateInvoiceCustomerIdInput;
@@ -1324,8 +1356,10 @@ export type DeleteS3ObjectResponseResolvers<ContextType = any, ParentType extend
 export type ExpenseResolvers<ContextType = any, ParentType extends ResolversParentTypes['Expense'] = ResolversParentTypes['Expense']> = {
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  category?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  payee?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1380,8 +1414,10 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateCustomerPhone?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerPhoneArgs, 'input'>>;
   updateCustomerProperties?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerPropertiesArgs, 'input'>>;
   updateExpenseAmount?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseAmountArgs, 'input'>>;
+  updateExpenseCategory?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseCategoryArgs, 'input'>>;
   updateExpenseDate?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseDateArgs, 'input'>>;
   updateExpenseDescription?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseDescriptionArgs, 'input'>>;
+  updateExpensePayee?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpensePayeeArgs, 'input'>>;
   updateInvoiceCharged?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationUpdateInvoiceChargedArgs, 'input'>>;
   updateInvoiceComments?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationUpdateInvoiceCommentsArgs, 'input'>>;
   updateInvoiceCustomerId?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationUpdateInvoiceCustomerIdArgs, 'input'>>;
@@ -1432,6 +1468,8 @@ export type PropertyResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  GetAnnualExpenseCsv?: Resolver<ResolversTypes['Buffer'], ParentType, ContextType>;
+  GetAnnualIncomeCsv?: Resolver<ResolversTypes['Buffer'], ParentType, ContextType>;
   getAllUsers?: Resolver<Maybe<Array<ResolversTypes['User']>>, ParentType, ContextType>;
   getPresignedS3Url?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPresignedS3UrlArgs, 'altTag' | 'commandType' | 'imgKey'>>;
   queryCustomerById?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<QueryQueryCustomerByIdArgs, 'customerId'>>;

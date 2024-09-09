@@ -92,12 +92,16 @@ type Expense {
 	_id: ID!
 	date: String!
 	amount: Float!
+	payee: String!
+	category: String!
 	description: String!
 
 }
 
 input CreateExpenseInput {
 	amount: Float!
+	payee: String!
+	category: String!
 	description: String!
 }
 
@@ -114,6 +118,16 @@ input UpdateExpenseAmountInput {
 input UpdateExpenseDescriptionInput {
 	expenseId: ID!
 	description: String!
+}
+
+input UpdateExpensePayeeInput {
+	expenseId: ID!
+	payee: String!
+}
+
+input UpdateExpenseCategoryInput {
+	expenseId: ID!
+	category: String!
 }
 
 input DeleteExpenseInput {
@@ -587,6 +601,10 @@ type Query {
 	# Thumbtack Review Queries
 	queryThumbtackReviews: [ThumbtackReview!]
 
+	# Annual Book Keeping Queries
+	GetAnnualExpenseCsv: Buffer!
+	GetAnnualIncomeCsv: Buffer!
+
 }
 
 # Mutations
@@ -607,6 +625,9 @@ type Mutation {
 	updateExpenseAmount(input: UpdateExpenseAmountInput!): Expense!
 	updateExpenseDescription(input: UpdateExpenseDescriptionInput!): Expense!
 	updateExpenseDate(input: UpdateExpenseDateInput!): Expense!
+	updateExpensePayee(input: UpdateExpensePayeeInput!): Expense!
+	updateExpenseCategory(input: UpdateExpenseCategoryInput!): Expense!
+	
 	deleteExpense(input: DeleteExpenseInput!): Expense!
 
 	# Customer Mutations

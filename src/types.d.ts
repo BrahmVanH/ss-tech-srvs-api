@@ -90,3 +90,18 @@ export type S3Object = {
 	Size: number;
 	StorageClass: string;
 };
+
+export interface IAnnualIncomeData {
+	date: string;
+	amount: number;
+	account: string;
+	customer: string;
+}
+
+export interface IAnnualExpenseData {
+	date: string;
+	amount: number;
+	payee: string;
+	category: string;
+	description: string;
+}

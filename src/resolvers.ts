@@ -63,6 +63,7 @@ import scrape from './lib/thumbtack_scraper';
 import { Types } from 'mongoose';
 import { emailInvoiceToCustomer, sendScheduleServiceEmail } from './lib/nodemailer';
 import createInvoicePdf from './lib/pdfkit';
+import { IAnnualExpenseData } from './types';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -83,6 +84,42 @@ const resolvers: Resolvers = {
 			} catch (err: any) {
 				console.error({ message: 'error in finding user', details: err });
 				throw new Error('Error in finding users: ' + err.message);
+			}
+		},
+		queryExpenses: async () => {
+			try {
+				await connectToDb();
+
+				const expenses = await Expense.find();
+
+				if (!expenses) {
+					throw new Error('Error fetching all expenses from database');
+				}
+
+				return expenses;
+			} catch (err: any) {
+				console.error({ message: 'error in finding expenses', details: err });
+				throw new Error('Error in finding expenses: ' + err.message);
+			}
+		},
+		queryExpenseById: async (_: {}, { expenseId }: { expenseId: string }, __: any) => {
+			try {
+				await connectToDb();
+
+				if (!expenseId) {
+					throw new Error('No expense ID was presented for querying expense');
+				}
+
+				const expense = await Expense.findOne({ _id: expenseId });
+
+				if (!expense) {
+					throw new Error('Cannot find expense in database');
+				}
+
+				return expense;
+			} catch (err: any) {
+				console.error({ message: 'error in finding expense', details: err });
+				throw new Error('Error in finding expense: ' + err.message);
 			}
 		},
 		queryCustomers: async () => {
@@ -320,6 +357,27 @@ const resolvers: Resolvers = {
 				throw new Error('Error in finding reviews: ' + err.message);
 			}
 		},
+		// GetAnnualExpenseCsv: async () => {
+		// 	try {
+		// 		await connectToDb();
+
+		// 		const expenses = await Expense.find();
+
+		// 		if (!expenses) {
+		// 			throw new Error('Error fetching all expenses from database');
+		// 		}
+
+		// 		const annualExpensesData: IAnnualExpenseData[] = expenses.map((expense) => {
+		// 			return {
+		// 				date: expense.date.toDateString(),
+		// 				amount: expense.amount,
+		// 				payee:
+
+		// 	} catch (err: any) {
+		// 		console.error({ message: 'error in finding expenses', details: err });
+		// 		throw new Error('Error in finding expenses: ' + err.message);
+		// 	}
+		// }
 
 		// getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
 		// 	try {
