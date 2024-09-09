@@ -44,7 +44,6 @@ export const sendScheduleServiceEmail = async (messageContent: ScheduleServiceMe
 	try {
 		const email = await transporter.sendMail(mailOptions);
 
-
 		if (email) {
 			console.log('Email sent:', email);
 		}
@@ -60,11 +59,19 @@ export const sendScheduleServiceEmail = async (messageContent: ScheduleServiceMe
 	}
 };
 
-export const emailInvoiceToCustomer = async (email: string, invoicePath: string) => {
-	const invoicePdf = fs.readFileSync(invoicePath);
+interface IInvoiceFile {
+	invoiceBuffer: Buffer;
+	invoiceFileName: string;
+}
 
-	if (!invoicePdf) {
-		throw new Error('Error reading invoice PDF');
+export const emailInvoiceToCustomer = async (recipientEmail: string, invoiceFile: IInvoiceFile) => {
+
+	if (!invoiceFile.invoiceFileName || !invoiceFile.invoiceBuffer) {
+		throw new Error('Missing invoice data');
+	}
+
+	if (!recipientEmail) {
+		throw new Error('Missing recipient email');
 	}
 
 	const transporter = nodemailer.createTransport({
@@ -79,17 +86,15 @@ export const emailInvoiceToCustomer = async (email: string, invoicePath: string)
 		},
 	});
 
-	const invoiceFileName = invoicePath.split('/').pop() ?? 'invoice.pdf';
-
 	const mailOptions = {
 		from: process.env.SMTP_USER ?? '',
-		to: email,
+		to: recipientEmail,
 		subject: 'Your Invoice',
 		text: 'Please find your invoice attached. Thank you for your business! \n \n Best, \n Brahm Van Houzen \n South Shore Mechanical Services \n 906-236-2760 \n 908 Champion Street \n Marquette, MI 49855',
 		attachments: [
 			{
-				filename: invoiceFileName,
-				content: invoicePdf,
+				filename: invoiceFile.invoiceFileName,
+				content: invoiceFile.invoiceBuffer,
 			},
 		],
 	};
@@ -97,17 +102,12 @@ export const emailInvoiceToCustomer = async (email: string, invoicePath: string)
 	try {
 		const email = await transporter.sendMail(mailOptions);
 
-		console.log('Email:', email);
-
-		if (email) {
-			console.log('Email sent:', email);
-		}
 
 		if (!email) {
 			throw new Error('Error sending email');
 		}
 
-		return invoicePdf;
+		return invoiceFile.invoiceBuffer;
 	} catch (error) {
 		console.error(error);
 		throw new Error('Error sending email');

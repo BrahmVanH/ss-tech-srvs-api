@@ -30,19 +30,15 @@ const invoice: any = {
 	total: 7500,
 	materialsCost: 0,
 	materialsCostDescription: '',
-	laborItems: [
-		{ laborCost: 7500, laborCostDescription: 'Dishwasher Basic Service' },
-	],
-	comments:
-		'Troubleshooted dishwasher not draining. Drain hose, pump, and filter all had small clogs. Removed dishwasher, cleaned all components, and reinstalled. ',
+	laborItems: [{ laborCost: 7500, laborCostDescription: 'Dishwasher Basic Service' }],
+	comments: 'Troubleshooted dishwasher not draining. Drain hose, pump, and filter all had small clogs. Removed dishwasher, cleaned all components, and reinstalled. ',
 	workOrders: [],
 	charged: true,
 	paid: false,
 	quote: 7500,
 };
 
-export default function createInvoicePdf(invoice: Invoice) {
-	const path = `src/dist/invoice_${invoice.customerId.lastName}_${invoice.customerId.firstName}_${invoice.invoiceNumber}.pdf`;
+export default async function createInvoicePdf(invoice: Invoice): Promise<Buffer> {
 	let doc = new PDFKit({ margin: 50 });
 
 	generateHeader(doc);
@@ -51,10 +47,31 @@ export default function createInvoicePdf(invoice: Invoice) {
 	generateInvoiceCommentsSection(doc, invoice);
 	generateFooter(doc);
 
-	doc.end();
-	doc.pipe(fs.createWriteStream(path));
+	try {
+		const pdfBuffer: Promise<Buffer> = new Promise((resolve, reject) => {
+			const chunks: Uint8Array[] = [];
+			doc.on('data', (chunk) => {
+				chunks.push(chunk);
+			});
+			doc.on('end', () => {
+				resolve(Buffer.concat(chunks));
+			});
+			doc.on('error', (err) => {
+				reject(err);
+			});
+			doc.end();
+		});
 
-	return path;
+		if (!pdfBuffer) {
+			throw new Error('Could not create PDF Buffer');
+		}
+
+
+		return pdfBuffer;
+	} catch (error) {
+		console.error(error);
+		throw new Error('Error creating PDF');
+	}
 }
 
 function generateHeader(doc: PDFKit.PDFDocument) {
@@ -73,7 +90,10 @@ function generateHeader(doc: PDFKit.PDFDocument) {
 		.moveDown();
 }
 function generateFooter(doc: PDFKit.PDFDocument) {
-	doc.moveDown(3).fontSize(10).text('Please make all checks out to South Shore Mechanical Services. Payment is due within 15 days, Thank you for your business!', 48, 700, { align: 'left', width: 400 });
+	doc
+		.moveDown(3)
+		.fontSize(10)
+		.text('Please make all checks out to South Shore Mechanical Services. Payment is due within 15 days, Thank you for your business!', 48, 700, { align: 'left', width: 400 });
 }
 
 function generateCustomerInformation(doc: PDFKit.PDFDocument, invoice: Invoice) {
@@ -121,7 +141,6 @@ function generateInvoiceTable(doc: PDFKit.PDFDocument, invoice: Invoice) {
 
 	const items = [...laborCostItems, materialsCostItem];
 	const totalCost = items.reduce((acc, item) => acc + item.cost, 0);
-
 
 	if (items.length > 0) {
 		for (i = 0; i < items.length; i++) {

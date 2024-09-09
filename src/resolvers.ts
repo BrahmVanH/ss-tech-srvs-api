@@ -1328,7 +1328,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const invoice = await Invoice.findOne({ _id: invoiceId });
+				const invoice = await Invoice.findOne({ _id: invoiceId }).populate([{ path: 'workOrders' }, { path: 'customerId' }]);
 
 				if (!invoice) {
 					throw new Error('Could not find invoice');
@@ -1346,10 +1346,6 @@ const resolvers: Resolvers = {
 					throw new Error('Could not find work orders');
 				}
 
-				const pdfPath = createInvoicePdf(invoice);
-
-				// To Do: upload pdf to s3, return pdf to client
-
 				return invoice;
 			} catch (err: any) {
 				throw new Error('Error in creating invoice PDF: ' + err.message);
@@ -1364,7 +1360,7 @@ const resolvers: Resolvers = {
 			try {
 				await connectToDb();
 
-				const invoice = await Invoice.findOne({ _id: invoiceId });
+				const invoice = await Invoice.findOne({ _id: invoiceId }).populate([{ path: 'workOrders' }, { path: 'customerId' }]);
 
 				if (!invoice) {
 					throw new Error('Could not find invoice');
@@ -1373,22 +1369,24 @@ const resolvers: Resolvers = {
 				const customer = await Customer.findOne({ _id: invoice.customerId });
 
 				if (!customer) {
-					throw new Error('Could not find customer');
+					throw new Error('Could not find customer with associated ID');
 				}
 
-				const invoicePath = createInvoicePdf(invoice);
+				const invoiceBuffer = await createInvoicePdf(invoice);
 
-				if (!invoicePath) {
+				if (!invoiceBuffer) {
 					throw new Error('Could not create invoice PDF');
 				}
 
-				const invoicePdf = await emailInvoiceToCustomer(invoicePath, customer.email);
+				const invoiceFileName = `invoice_${invoice.customerId.lastName ?? ''}_${invoice.customerId.firstName ?? ''}_${invoice.invoiceNumber ?? ''}.pdf`;
+
+				const invoicePdf = await emailInvoiceToCustomer(customer.email, { invoiceFileName, invoiceBuffer });
 
 				if (!invoicePdf) {
 					throw new Error('Could not send invoice email');
 				}
 
-				return invoice;
+				return invoiceBuffer;
 			} catch (err: any) {
 				throw new Error('Error in sending invoice email: ' + err.message);
 			}

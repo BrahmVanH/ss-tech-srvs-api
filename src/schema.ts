@@ -1,6 +1,8 @@
 const typeDefs = `#graphql
 
 
+scalar Buffer
+
 # AWS S3 Types
 
 type imageObject {
@@ -82,6 +84,21 @@ input LoginUserInput {
 input RemoveUserInput {
 	username: String!
 	userPassword: String!
+}
+
+# Expense & CRUD Types
+
+type Expense {
+	_id: ID!
+	date: String!
+	amount: Float!
+	description: String!
+
+}
+
+input CreateExpenseInput {
+	amount: Float!
+	description: String!
 }
 
 # Customer & CRUD Types
@@ -520,6 +537,10 @@ type Query {
 	# User Queries
 	getAllUsers: [User!]
 
+	# Expense Queries
+	queryExpenses: [Expense!]
+	queryExpenseById(expenseId: ID!): Expense!
+
 	# Customer Queries
 	queryCustomers: [Customer!]
 	queryCustomerById(customerId: ID!): Customer!
@@ -561,6 +582,10 @@ type Mutation {
 	updateUserPin(input: UpdateUserPinInput!): Auth!
 	loginUser(input: LoginUserInput!): Auth!
 	removeUser(input: RemoveUserInput!): Auth!
+
+	# Expense Mutations
+	createExpense(input: CreateExpenseInput!): Expense!
+	deleteExpense(expenseId: ID!): Expense!
 
 	# Customer Mutations
 	createCustomer(input: CreateCustomerInput!): Customer!
@@ -614,8 +639,8 @@ type Mutation {
 	updateInvoiceLaborCost(input: UpdateInvoiceLaborCostInput!): Invoice!
 	updateInvoiceLaborCostDescription(input: UpdateInvoiceLaborCostDescriptionInput!): Invoice!
 	updateInvoiceComments(input: UpdateInvoiceCommentsInput!): Invoice!
-	createInvoicePdf(input: CreateInvoicePdfInput!): Invoice!
-	sendInvoiceEmail(input: CreateInvoicePdfInput!): Invoice!
+	createInvoicePdf(input: CreateInvoicePdfInput!): Buffer!
+	sendInvoiceEmail(input: CreateInvoicePdfInput!): Buffer!
 	deleteInvoice(input: RemoveInvoiceInput!): Invoice!
 
 	# Schedule Service Mutations

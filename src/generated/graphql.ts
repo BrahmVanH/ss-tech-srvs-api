@@ -14,6 +14,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  Buffer: { input: any; output: any; }
   email_String_NotNull_maxLength_255_format_email: { input: any; output: any; }
   familyName_String_NotNull_minLength_1_maxLength_20: { input: any; output: any; }
   givenName_String_NotNull_minLength_1_maxLength_20: { input: any; output: any; }
@@ -58,6 +59,11 @@ export type CreateCustomerInput = {
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   phone: Scalars['String']['input'];
+};
+
+export type CreateExpenseInput = {
+  amount: Scalars['Float']['input'];
+  description: Scalars['String']['input'];
 };
 
 export type CreateInvoiceInput = {
@@ -136,6 +142,14 @@ export type DeleteS3ObjectResponse = {
   status: Scalars['Int']['output'];
 };
 
+export type Expense = {
+  __typename?: 'Expense';
+  _id: Scalars['ID']['output'];
+  amount: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+};
+
 export type Invoice = {
   __typename?: 'Invoice';
   _id: Scalars['ID']['output'];
@@ -174,19 +188,21 @@ export type LoginUserInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createCustomer: Customer;
+  createExpense: Expense;
   createInvoice: Invoice;
-  createInvoicePdf: Invoice;
+  createInvoicePdf: Scalars['Buffer']['output'];
   createProperty: Property;
   createUser: Auth;
   createWorkOrder: WorkOrder;
   deleteCustomer: Customer;
+  deleteExpense: Expense;
   deleteInvoice: Invoice;
   deleteProperty: Property;
   deleteS3Objects: DeleteS3ObjectResponse;
   deleteWorkOrder: WorkOrder;
   loginUser: Auth;
   removeUser: Auth;
-  sendInvoiceEmail: Invoice;
+  sendInvoiceEmail: Scalars['Buffer']['output'];
   sendScheduleServiceMessage: Scalars['String']['output'];
   updateCustomerAddress: Customer;
   updateCustomerBusinessName: Customer;
@@ -238,6 +254,11 @@ export type MutationCreateCustomerArgs = {
 };
 
 
+export type MutationCreateExpenseArgs = {
+  input: CreateExpenseInput;
+};
+
+
 export type MutationCreateInvoiceArgs = {
   input: CreateInvoiceInput;
 };
@@ -265,6 +286,11 @@ export type MutationCreateWorkOrderArgs = {
 
 export type MutationDeleteCustomerArgs = {
   input: RemoveCustomerInput;
+};
+
+
+export type MutationDeleteExpenseArgs = {
+  expenseId: Scalars['ID']['input'];
 };
 
 
@@ -535,6 +561,8 @@ export type Query = {
   getPresignedS3Url: Scalars['String']['output'];
   queryCustomerById: Customer;
   queryCustomers?: Maybe<Array<Customer>>;
+  queryExpenseById: Expense;
+  queryExpenses?: Maybe<Array<Expense>>;
   queryInvoiceById: Invoice;
   queryInvoices?: Maybe<Array<Invoice>>;
   queryInvoicesByCustomer?: Maybe<Array<Invoice>>;
@@ -558,6 +586,11 @@ export type QueryGetPresignedS3UrlArgs = {
 
 export type QueryQueryCustomerByIdArgs = {
   customerId: Scalars['ID']['input'];
+};
+
+
+export type QueryQueryExpenseByIdArgs = {
+  expenseId: Scalars['ID']['input'];
 };
 
 
@@ -993,7 +1026,9 @@ export type ResolversTypes = {
   AddressInput: AddressInput;
   Auth: ResolverTypeWrapper<Auth>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Buffer: ResolverTypeWrapper<Scalars['Buffer']['output']>;
   CreateCustomerInput: CreateCustomerInput;
+  CreateExpenseInput: CreateExpenseInput;
   CreateInvoiceInput: CreateInvoiceInput;
   CreateInvoicePdfInput: CreateInvoicePdfInput;
   CreatePropertyInput: CreatePropertyInput;
@@ -1002,6 +1037,7 @@ export type ResolversTypes = {
   Customer: ResolverTypeWrapper<Customer>;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: ResolverTypeWrapper<DeleteS3ObjectResponse>;
+  Expense: ResolverTypeWrapper<Expense>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -1085,7 +1121,9 @@ export type ResolversParentTypes = {
   AddressInput: AddressInput;
   Auth: Auth;
   Boolean: Scalars['Boolean']['output'];
+  Buffer: Scalars['Buffer']['output'];
   CreateCustomerInput: CreateCustomerInput;
+  CreateExpenseInput: CreateExpenseInput;
   CreateInvoiceInput: CreateInvoiceInput;
   CreateInvoicePdfInput: CreateInvoicePdfInput;
   CreatePropertyInput: CreatePropertyInput;
@@ -1094,6 +1132,7 @@ export type ResolversParentTypes = {
   Customer: Customer;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: DeleteS3ObjectResponse;
+  Expense: Expense;
   Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
@@ -1211,6 +1250,10 @@ export type AuthResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface BufferScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Buffer'], any> {
+  name: 'Buffer';
+}
+
 export type CustomerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Customer'] = ResolversParentTypes['Customer']> = {
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   address?: Resolver<ResolversTypes['Address'], ParentType, ContextType>;
@@ -1230,6 +1273,14 @@ export type CustomerResolvers<ContextType = any, ParentType extends ResolversPar
 export type DeleteS3ObjectResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteS3ObjectResponse'] = ResolversParentTypes['DeleteS3ObjectResponse']> = {
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ExpenseResolvers<ContextType = any, ParentType extends ResolversParentTypes['Expense'] = ResolversParentTypes['Expense']> = {
+  _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1260,19 +1311,21 @@ export type LaborItemResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createCustomer?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationCreateCustomerArgs, 'input'>>;
+  createExpense?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationCreateExpenseArgs, 'input'>>;
   createInvoice?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationCreateInvoiceArgs, 'input'>>;
-  createInvoicePdf?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationCreateInvoicePdfArgs, 'input'>>;
+  createInvoicePdf?: Resolver<ResolversTypes['Buffer'], ParentType, ContextType, RequireFields<MutationCreateInvoicePdfArgs, 'input'>>;
   createProperty?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<MutationCreatePropertyArgs, 'input'>>;
   createUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   createWorkOrder?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationCreateWorkOrderArgs, 'input'>>;
   deleteCustomer?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationDeleteCustomerArgs, 'input'>>;
+  deleteExpense?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationDeleteExpenseArgs, 'expenseId'>>;
   deleteInvoice?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationDeleteInvoiceArgs, 'input'>>;
   deleteProperty?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<MutationDeletePropertyArgs, 'input'>>;
   deleteS3Objects?: Resolver<ResolversTypes['DeleteS3ObjectResponse'], ParentType, ContextType, RequireFields<MutationDeleteS3ObjectsArgs, 'input'>>;
   deleteWorkOrder?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationDeleteWorkOrderArgs, 'input'>>;
   loginUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationLoginUserArgs, 'input'>>;
   removeUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationRemoveUserArgs, 'input'>>;
-  sendInvoiceEmail?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationSendInvoiceEmailArgs, 'input'>>;
+  sendInvoiceEmail?: Resolver<ResolversTypes['Buffer'], ParentType, ContextType, RequireFields<MutationSendInvoiceEmailArgs, 'input'>>;
   sendScheduleServiceMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSendScheduleServiceMessageArgs, 'input'>>;
   updateCustomerAddress?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerAddressArgs, 'input'>>;
   updateCustomerBusinessName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerBusinessNameArgs, 'input'>>;
@@ -1335,6 +1388,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getPresignedS3Url?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPresignedS3UrlArgs, 'altTag' | 'commandType' | 'imgKey'>>;
   queryCustomerById?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<QueryQueryCustomerByIdArgs, 'customerId'>>;
   queryCustomers?: Resolver<Maybe<Array<ResolversTypes['Customer']>>, ParentType, ContextType>;
+  queryExpenseById?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<QueryQueryExpenseByIdArgs, 'expenseId'>>;
+  queryExpenses?: Resolver<Maybe<Array<ResolversTypes['Expense']>>, ParentType, ContextType>;
   queryInvoiceById?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<QueryQueryInvoiceByIdArgs, 'invoiceId'>>;
   queryInvoices?: Resolver<Maybe<Array<ResolversTypes['Invoice']>>, ParentType, ContextType>;
   queryInvoicesByCustomer?: Resolver<Maybe<Array<ResolversTypes['Invoice']>>, ParentType, ContextType, RequireFields<QueryQueryInvoicesByCustomerArgs, 'customerId'>>;
@@ -1449,8 +1504,10 @@ export interface Tel_String_NotNull_MinLength_1_MaxLength_12ScalarConfig extends
 export type Resolvers<ContextType = any> = {
   Address?: AddressResolvers<ContextType>;
   Auth?: AuthResolvers<ContextType>;
+  Buffer?: GraphQLScalarType;
   Customer?: CustomerResolvers<ContextType>;
   DeleteS3ObjectResponse?: DeleteS3ObjectResponseResolvers<ContextType>;
+  Expense?: ExpenseResolvers<ContextType>;
   Invoice?: InvoiceResolvers<ContextType>;
   LaborItem?: LaborItemResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
