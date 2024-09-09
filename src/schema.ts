@@ -101,6 +101,25 @@ input CreateExpenseInput {
 	description: String!
 }
 
+input UpdateExpenseDateInput {
+	expenseId: ID!
+	date: String!
+}
+
+input UpdateExpenseAmountInput {
+	expenseId: ID!
+	amount: Float!
+}
+
+input UpdateExpenseDescriptionInput {
+	expenseId: ID!
+	description: String!
+}
+
+input DeleteExpenseInput {
+	expenseId: ID!
+}
+
 # Customer & CRUD Types
 
 
@@ -585,7 +604,10 @@ type Mutation {
 
 	# Expense Mutations
 	createExpense(input: CreateExpenseInput!): Expense!
-	deleteExpense(expenseId: ID!): Expense!
+	updateExpenseAmount(input: UpdateExpenseAmountInput!): Expense!
+	updateExpenseDescription(input: UpdateExpenseDescriptionInput!): Expense!
+	updateExpenseDate(input: UpdateExpenseDateInput!): Expense!
+	deleteExpense(input: DeleteExpenseInput!): Expense!
 
 	# Customer Mutations
 	createCustomer(input: CreateCustomerInput!): Customer!

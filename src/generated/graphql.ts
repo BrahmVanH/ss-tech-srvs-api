@@ -132,6 +132,10 @@ export type Customer = {
   workOrders: Array<Maybe<WorkOrder>>;
 };
 
+export type DeleteExpenseInput = {
+  expenseId: Scalars['ID']['input'];
+};
+
 export type DeleteS3ObjectInput = {
   imgKeys: Array<Scalars['String']['input']>;
 };
@@ -211,6 +215,9 @@ export type Mutation = {
   updateCustomerLastName: Customer;
   updateCustomerPhone: Customer;
   updateCustomerProperties: Customer;
+  updateExpenseAmount: Expense;
+  updateExpenseDate: Expense;
+  updateExpenseDescription: Expense;
   updateInvoiceCharged: Invoice;
   updateInvoiceComments: Invoice;
   updateInvoiceCustomerId: Invoice;
@@ -290,7 +297,7 @@ export type MutationDeleteCustomerArgs = {
 
 
 export type MutationDeleteExpenseArgs = {
-  expenseId: Scalars['ID']['input'];
+  input: DeleteExpenseInput;
 };
 
 
@@ -366,6 +373,21 @@ export type MutationUpdateCustomerPhoneArgs = {
 
 export type MutationUpdateCustomerPropertiesArgs = {
   input: UpdateCustomerPropertiesInput;
+};
+
+
+export type MutationUpdateExpenseAmountArgs = {
+  input: UpdateExpenseAmountInput;
+};
+
+
+export type MutationUpdateExpenseDateArgs = {
+  input: UpdateExpenseDateInput;
+};
+
+
+export type MutationUpdateExpenseDescriptionArgs = {
+  input: UpdateExpenseDescriptionInput;
 };
 
 
@@ -728,6 +750,21 @@ export type UpdateCustomerPropertiesInput = {
   property?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type UpdateExpenseAmountInput = {
+  amount: Scalars['Float']['input'];
+  expenseId: Scalars['ID']['input'];
+};
+
+export type UpdateExpenseDateInput = {
+  date: Scalars['String']['input'];
+  expenseId: Scalars['ID']['input'];
+};
+
+export type UpdateExpenseDescriptionInput = {
+  description: Scalars['String']['input'];
+  expenseId: Scalars['ID']['input'];
+};
+
 export type UpdateInvoiceChargedInput = {
   charged: Scalars['Boolean']['input'];
   invoiceId: Scalars['ID']['input'];
@@ -1035,6 +1072,7 @@ export type ResolversTypes = {
   CreateUserInput: CreateUserInput;
   CreateWorkOrderInput: CreateWorkOrderInput;
   Customer: ResolverTypeWrapper<Customer>;
+  DeleteExpenseInput: DeleteExpenseInput;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: ResolverTypeWrapper<DeleteS3ObjectResponse>;
   Expense: ResolverTypeWrapper<Expense>;
@@ -1067,6 +1105,9 @@ export type ResolversTypes = {
   UpdateCustomerLastNameInput: UpdateCustomerLastNameInput;
   UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
   UpdateCustomerPropertiesInput: UpdateCustomerPropertiesInput;
+  UpdateExpenseAmountInput: UpdateExpenseAmountInput;
+  UpdateExpenseDateInput: UpdateExpenseDateInput;
+  UpdateExpenseDescriptionInput: UpdateExpenseDescriptionInput;
   UpdateInvoiceChargedInput: UpdateInvoiceChargedInput;
   UpdateInvoiceCommentsInput: UpdateInvoiceCommentsInput;
   UpdateInvoiceCustomerIdInput: UpdateInvoiceCustomerIdInput;
@@ -1130,6 +1171,7 @@ export type ResolversParentTypes = {
   CreateUserInput: CreateUserInput;
   CreateWorkOrderInput: CreateWorkOrderInput;
   Customer: Customer;
+  DeleteExpenseInput: DeleteExpenseInput;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: DeleteS3ObjectResponse;
   Expense: Expense;
@@ -1162,6 +1204,9 @@ export type ResolversParentTypes = {
   UpdateCustomerLastNameInput: UpdateCustomerLastNameInput;
   UpdateCustomerPhoneInput: UpdateCustomerPhoneInput;
   UpdateCustomerPropertiesInput: UpdateCustomerPropertiesInput;
+  UpdateExpenseAmountInput: UpdateExpenseAmountInput;
+  UpdateExpenseDateInput: UpdateExpenseDateInput;
+  UpdateExpenseDescriptionInput: UpdateExpenseDescriptionInput;
   UpdateInvoiceChargedInput: UpdateInvoiceChargedInput;
   UpdateInvoiceCommentsInput: UpdateInvoiceCommentsInput;
   UpdateInvoiceCustomerIdInput: UpdateInvoiceCustomerIdInput;
@@ -1318,7 +1363,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createUser?: Resolver<ResolversTypes['Auth'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   createWorkOrder?: Resolver<ResolversTypes['WorkOrder'], ParentType, ContextType, RequireFields<MutationCreateWorkOrderArgs, 'input'>>;
   deleteCustomer?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationDeleteCustomerArgs, 'input'>>;
-  deleteExpense?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationDeleteExpenseArgs, 'expenseId'>>;
+  deleteExpense?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationDeleteExpenseArgs, 'input'>>;
   deleteInvoice?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationDeleteInvoiceArgs, 'input'>>;
   deleteProperty?: Resolver<ResolversTypes['Property'], ParentType, ContextType, RequireFields<MutationDeletePropertyArgs, 'input'>>;
   deleteS3Objects?: Resolver<ResolversTypes['DeleteS3ObjectResponse'], ParentType, ContextType, RequireFields<MutationDeleteS3ObjectsArgs, 'input'>>;
@@ -1334,6 +1379,9 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateCustomerLastName?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerLastNameArgs, 'input'>>;
   updateCustomerPhone?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerPhoneArgs, 'input'>>;
   updateCustomerProperties?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<MutationUpdateCustomerPropertiesArgs, 'input'>>;
+  updateExpenseAmount?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseAmountArgs, 'input'>>;
+  updateExpenseDate?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseDateArgs, 'input'>>;
+  updateExpenseDescription?: Resolver<ResolversTypes['Expense'], ParentType, ContextType, RequireFields<MutationUpdateExpenseDescriptionArgs, 'input'>>;
   updateInvoiceCharged?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationUpdateInvoiceChargedArgs, 'input'>>;
   updateInvoiceComments?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationUpdateInvoiceCommentsArgs, 'input'>>;
   updateInvoiceCustomerId?: Resolver<ResolversTypes['Invoice'], ParentType, ContextType, RequireFields<MutationUpdateInvoiceCustomerIdArgs, 'input'>>;

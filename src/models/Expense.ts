@@ -3,7 +3,10 @@ import { Expense } from '../generated/graphql';
 
 const expenseSchema: Schema<Expense> = new Schema<Expense>(
 	{
-		date: new Date(),
+		date: {
+      type: String,
+      required: true,
+    },
 		amount: {
 			type: Number,
 			required: true,

@@ -1,4 +1,4 @@
-import { User, Customer, Property, WorkOrder } from './models';
+import { User, Customer, Property, WorkOrder, Expense } from './models';
 import { connectToDb } from './connection/db';
 import { signToken } from './utils/auth';
 import {
@@ -50,6 +50,11 @@ import {
 	MutationCreateInvoicePdfArgs,
 	MutationSendInvoiceEmailArgs,
 	MutationUpdateWorkOrderLaborItemsArgs,
+	MutationCreateExpenseArgs,
+	MutationDeleteExpenseArgs,
+	MutationUpdateExpenseAmountArgs,
+	MutationUpdateExpenseDateArgs,
+	MutationUpdateExpenseDescriptionArgs,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
@@ -553,6 +558,105 @@ const resolvers: Resolvers = {
 				return { token, user: deletedUser };
 			} catch (err: any) {
 				throw new Error('Error in removing in user: ' + err.message);
+			}
+		},
+		createExpense: async (_: {}, args: MutationCreateExpenseArgs, __: any) => {
+			const { amount, description } = args.input;
+			if (!amount || !description) {
+				throw new Error('amount and description fields must be filled to create expense');
+			}
+			try {
+				await connectToDb();
+
+				const newExpense = await Expense.create({ date: new Date(), amount, description });
+
+				if (!newExpense) {
+					throw new Error('Could not create expense');
+				}
+
+				return newExpense;
+			} catch (err: any) {
+				throw new Error('Error in creating expense: ' + err.message);
+			}
+		},
+		updateExpenseAmount: async (_: {}, args: MutationUpdateExpenseAmountArgs, __: any) => {
+			const { expenseId, amount } = args.input;
+			if (!expenseId || !amount) {
+				throw new Error('expenseId and amount fields must be filled to update expense amount');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedExpense = await Expense.findOneAndUpdate({ _id: expenseId }, { amount }, { new: true });
+
+				if (!updatedExpense) {
+					throw new Error('Could not update expense amount');
+				}
+
+				return updatedExpense;
+			} catch (err: any) {
+				throw new Error('Error in updating expense amount: ' + err.message);
+			}
+		},
+		updateExpenseDate: async (_: {}, args: MutationUpdateExpenseDateArgs, __: any) => {
+			const { expenseId, date } = args.input;
+			if (!expenseId || !date) {
+				throw new Error('expenseId and date fields must be filled to update expense date');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedExpense = await Expense.findOneAndUpdate({ _id: expenseId }, { date }, { new: true });
+
+				if (!updatedExpense) {
+					throw new Error('Could not update expense date');
+				}
+
+				return updatedExpense;
+			} catch (err: any) {
+				throw new Error('Error in updating expense date: ' + err.message);
+			}
+		},
+		updateExpenseDescription: async (_: {}, args: MutationUpdateExpenseDescriptionArgs, __: any) => {
+			const { expenseId, description } = args.input;
+			if (!expenseId || !description) {
+				throw new Error('expenseId and description fields must be filled to update expense description');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedExpense = await Expense.findOneAndUpdate({ _id: expenseId }, { description }, { new: true });
+
+				if (!updatedExpense) {
+					throw new Error('Could not update expense description');
+				}
+
+				return updatedExpense;
+			} catch (err: any) {
+				throw new Error('Error in updating expense description: ' + err.message);
+			}
+		},
+		deleteExpense: async (_: {}, args: MutationDeleteExpenseArgs, __: any) => {
+			const { expenseId } = args.input;
+			if (!expenseId) {
+				throw new Error('No expense ID was presented for deleting expense');
+			}
+
+			try {
+				await connectToDb();
+
+				const deletedExpense = await Expense.findOneAndDelete({ _id: expenseId });
+
+				if (!deletedExpense) {
+					throw new Error('Could not delete expense');
+				}
+
+				return deletedExpense;
+			} catch (err: any) {
+				throw new Error('Error in deleting expense: ' + err.message);
 			}
 		},
 		createCustomer: async (_: {}, args: MutationCreateCustomerArgs, __: any) => {
