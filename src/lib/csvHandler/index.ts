@@ -1,37 +1,54 @@
 import fs from 'fs';
-import { createObjectCsvWriter } from 'csv-writer';
+import { createObjectCsvWriter, createObjectCsvStringifier } from 'csv-writer';
 import { IAnnualExpenseData, IAnnualIncomeData } from '../../types';
 
-const csvHandler = {
-	createIncomeDataCsv: async (incomeData: IAnnualIncomeData[], detailed: boolean = false) => {
-		const header = [
-					{ id: 'date', title: 'Date' },
-					{ id: 'amount', title: 'Amount' },
-					{ id: 'customer', title: 'Customer' },
-					{ id: 'account', title: 'Account' },
-			  ];
-		const csvWriter = createObjectCsvWriter({
-			path: 'csv/financialData.csv',
-			header,
-		});
+async function createCsvString(data: IAnnualExpenseData[] | IAnnualIncomeData[], headers: any[]) {
+	const csvStringifier = createObjectCsvStringifier({ header: headers });
 
-		await csvWriter.writeRecords(incomeData);
-	},
-	createExpenseDataCsv: async (expenseData: IAnnualExpenseData[]) => {
-		const header = [
-			{ id: 'date', title: 'Date' },
-			{ id: 'amount', title: 'Amount' },
-			{ id: 'payee', title: 'Payee' },
-			{ id: 'category', title: 'Category' },
-			{ id: 'description', title: 'Description' },
-		];
-		const csvWriter = createObjectCsvWriter({
-			path: 'csv/expenseData.csv',
-			header,
-		});
+	const headerString = csvStringifier.getHeaderString();
+	const recordsString = csvStringifier.stringifyRecords(data);
 
-		await csvWriter.writeRecords(expenseData);
-	},
-};
+	return headerString + recordsString;
+}
 
-export default csvHandler;
+export async function exportIncomeToCsv(incomeData: IAnnualIncomeData[], detailed: boolean = false) {
+	const header = [
+		{ id: 'date', title: 'Date' },
+		{ id: 'amount', title: 'Amount' },
+		{ id: 'customer', title: 'Customer' },
+		{ id: 'account', title: 'Account' },
+	];
+	try {
+		const csvString = await createCsvString(incomeData, header);
+    const base64String = Buffer.from(csvString).toString('base64');
+		if (!base64String) {
+			throw new Error('Error creating CSV base 64 string');
+		}
+		return base64String;
+	} catch (error) {
+		console.error(error);
+		throw new Error('Error creating CSV');
+	}
+}
+
+export async function exportExpensesToCsv(expenseData: IAnnualExpenseData[]) {
+	const header = [
+		{ id: 'date', title: 'Date' },
+		{ id: 'amount', title: 'Amount' },
+		{ id: 'payee', title: 'Payee' },
+		{ id: 'category', title: 'Category' },
+		{ id: 'description', title: 'Description' },
+	];
+
+	try {
+		const csvString = await createCsvString(expenseData, header);
+    const base64String = Buffer.from(csvString).toString('base64');
+		if (!base64String) {
+			throw new Error('Error creating CSV base 64 string');
+		}
+		return base64String;
+	} catch (error) {
+		console.error(error);
+		throw new Error('Error creating CSV');
+	}
+}

@@ -15,6 +15,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   Buffer: { input: any; output: any; }
+  Date: { input: any; output: any; }
   email_String_NotNull_maxLength_255_format_email: { input: any; output: any; }
   familyName_String_NotNull_minLength_1_maxLength_20: { input: any; output: any; }
   givenName_String_NotNull_minLength_1_maxLength_20: { input: any; output: any; }
@@ -153,7 +154,7 @@ export type Expense = {
   _id: Scalars['ID']['output'];
   amount: Scalars['Float']['output'];
   category: Scalars['String']['output'];
-  date: Scalars['String']['output'];
+  date: Scalars['Date']['output'];
   description: Scalars['String']['output'];
   payee: Scalars['String']['output'];
 };
@@ -595,8 +596,8 @@ export type Property = {
 
 export type Query = {
   __typename?: 'Query';
-  GetAnnualExpenseCsv: Scalars['Buffer']['output'];
-  GetAnnualIncomeCsv: Scalars['Buffer']['output'];
+  GetAnnualExpenseCsv: Scalars['String']['output'];
+  GetAnnualIncomeCsv: Scalars['String']['output'];
   getAllUsers?: Maybe<Array<User>>;
   getPresignedS3Url: Scalars['String']['output'];
   queryCustomerById: Customer;
@@ -779,7 +780,7 @@ export type UpdateExpenseCategoryInput = {
 };
 
 export type UpdateExpenseDateInput = {
-  date: Scalars['String']['input'];
+  date: Scalars['Date']['input'];
   expenseId: Scalars['ID']['input'];
 };
 
@@ -1100,6 +1101,7 @@ export type ResolversTypes = {
   CreateUserInput: CreateUserInput;
   CreateWorkOrderInput: CreateWorkOrderInput;
   Customer: ResolverTypeWrapper<Customer>;
+  Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DeleteExpenseInput: DeleteExpenseInput;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: ResolverTypeWrapper<DeleteS3ObjectResponse>;
@@ -1201,6 +1203,7 @@ export type ResolversParentTypes = {
   CreateUserInput: CreateUserInput;
   CreateWorkOrderInput: CreateWorkOrderInput;
   Customer: Customer;
+  Date: Scalars['Date']['output'];
   DeleteExpenseInput: DeleteExpenseInput;
   DeleteS3ObjectInput: DeleteS3ObjectInput;
   DeleteS3ObjectResponse: DeleteS3ObjectResponse;
@@ -1347,6 +1350,10 @@ export type CustomerResolvers<ContextType = any, ParentType extends ResolversPar
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date';
+}
+
 export type DeleteS3ObjectResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteS3ObjectResponse'] = ResolversParentTypes['DeleteS3ObjectResponse']> = {
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1357,7 +1364,7 @@ export type ExpenseResolvers<ContextType = any, ParentType extends ResolversPare
   _id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   category?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   payee?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1468,8 +1475,8 @@ export type PropertyResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  GetAnnualExpenseCsv?: Resolver<ResolversTypes['Buffer'], ParentType, ContextType>;
-  GetAnnualIncomeCsv?: Resolver<ResolversTypes['Buffer'], ParentType, ContextType>;
+  GetAnnualExpenseCsv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  GetAnnualIncomeCsv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   getAllUsers?: Resolver<Maybe<Array<ResolversTypes['User']>>, ParentType, ContextType>;
   getPresignedS3Url?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPresignedS3UrlArgs, 'altTag' | 'commandType' | 'imgKey'>>;
   queryCustomerById?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<QueryQueryCustomerByIdArgs, 'customerId'>>;
@@ -1592,6 +1599,7 @@ export type Resolvers<ContextType = any> = {
   Auth?: AuthResolvers<ContextType>;
   Buffer?: GraphQLScalarType;
   Customer?: CustomerResolvers<ContextType>;
+  Date?: GraphQLScalarType;
   DeleteS3ObjectResponse?: DeleteS3ObjectResponseResolvers<ContextType>;
   Expense?: ExpenseResolvers<ContextType>;
   Invoice?: InvoiceResolvers<ContextType>;

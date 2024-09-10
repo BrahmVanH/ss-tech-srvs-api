@@ -15,6 +15,16 @@ const expenseSchema: Schema<Expense> = new Schema<Expense>(
 			type: String,
 			required: true,
 		},
+		category: {
+			type: String,
+			required: true,
+		},
+		payee: {
+			type: String,
+			required: true,
+		},
+		
+
 	},
 	{
 		timestamps: true,

@@ -55,6 +55,8 @@ import {
 	MutationUpdateExpenseAmountArgs,
 	MutationUpdateExpenseDateArgs,
 	MutationUpdateExpenseDescriptionArgs,
+	MutationUpdateExpenseCategoryArgs,
+	MutationUpdateExpensePayeeArgs,
 } from './generated/graphql';
 import { hash } from 'bcryptjs';
 import { comparePassword, hashPassword } from './utils/helpers';
@@ -63,6 +65,7 @@ import scrape from './lib/thumbtack_scraper';
 import { Types } from 'mongoose';
 import { emailInvoiceToCustomer, sendScheduleServiceEmail } from './lib/nodemailer';
 import createInvoicePdf from './lib/pdfkit';
+import * as csvHandler from './lib/csvHandler';
 import { IAnnualExpenseData } from './types';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
@@ -357,27 +360,38 @@ const resolvers: Resolvers = {
 				throw new Error('Error in finding reviews: ' + err.message);
 			}
 		},
-		// GetAnnualExpenseCsv: async () => {
-		// 	try {
-		// 		await connectToDb();
+		GetAnnualExpenseCsv: async () => {
+			try {
+				await connectToDb();
 
-		// 		const expenses = await Expense.find();
+				const expenses = await Expense.find();
 
-		// 		if (!expenses) {
-		// 			throw new Error('Error fetching all expenses from database');
-		// 		}
+				if (!expenses) {
+					throw new Error('Error fetching all expenses from database');
+				}
 
-		// 		const annualExpensesData: IAnnualExpenseData[] = expenses.map((expense) => {
-		// 			return {
-		// 				date: expense.date.toDateString(),
-		// 				amount: expense.amount,
-		// 				payee:
+				const annualExpensesData: IAnnualExpenseData[] = expenses.map((expense) => {
+					return {
+						date: expense.date ?? '',
+						amount: expense.amount ?? 0,
+						payee: expense.payee ?? ' ',
+						category: expense.category ?? ' ',
+						description: expense.description ?? ' ',
+					};
+				});
+				const csvString = await csvHandler.exportExpensesToCsv(annualExpensesData);
 
-		// 	} catch (err: any) {
-		// 		console.error({ message: 'error in finding expenses', details: err });
-		// 		throw new Error('Error in finding expenses: ' + err.message);
-		// 	}
-		// }
+				if (!csvString) {
+					throw new Error('Error creating CSV buffer');
+				}
+
+				return csvString;
+
+			} catch (err: any) {
+				console.error({ message: 'error in finding expenses', details: err });
+				throw new Error('Error in finding expenses: ' + err.message);
+			}
+		},
 
 		// getPresignedS3Url: async (_: {}, { imgKey, commandType, altTag }: { imgKey: string; commandType: string; altTag: string }, __: any) => {
 		// 	try {
@@ -619,14 +633,14 @@ const resolvers: Resolvers = {
 			}
 		},
 		createExpense: async (_: {}, args: MutationCreateExpenseArgs, __: any) => {
-			const { amount, description } = args.input;
-			if (!amount || !description) {
+			const { amount, description, payee, category } = args.input;
+			if (!amount || !description || !payee || !category) {
 				throw new Error('amount and description fields must be filled to create expense');
 			}
 			try {
 				await connectToDb();
 
-				const newExpense = await Expense.create({ date: new Date(), amount, description });
+				const newExpense = await Expense.create({ date: new Date(), amount, description, payee, category });
 
 				if (!newExpense) {
 					throw new Error('Could not create expense');
@@ -695,6 +709,46 @@ const resolvers: Resolvers = {
 				return updatedExpense;
 			} catch (err: any) {
 				throw new Error('Error in updating expense description: ' + err.message);
+			}
+		},
+		updateExpenseCategory: async (_: {}, args: MutationUpdateExpenseCategoryArgs, __: any) => {
+			const { expenseId, category } = args.input;
+			if (!expenseId || !category) {
+				throw new Error('expenseId and category fields must be filled to update expense category');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedExpense = await Expense.findOneAndUpdate({ _id: expenseId }, { category }, { new: true });
+
+				if (!updatedExpense) {
+					throw new Error('Could not update expense category');
+				}
+
+				return updatedExpense;
+			} catch (err: any) {
+				throw new Error('Error in updating expense category: ' + err.message);
+			}
+		},
+		updateExpensePayee: async (_: {}, args: MutationUpdateExpensePayeeArgs, __: any) => {
+			const { expenseId, payee } = args.input;
+			if (!expenseId || !payee) {
+				throw new Error('expenseId and payee fields must be filled to update expense payee');
+			}
+
+			try {
+				await connectToDb();
+
+				const updatedExpense = await Expense.findOneAndUpdate({ _id: expenseId }, { payee }, { new: true });
+
+				if (!updatedExpense) {
+					throw new Error('Could not update expense payee');
+				}
+
+				return updatedExpense;
+			} catch (err: any) {
+				throw new Error('Error in updating expense payee: ' + err.message);
 			}
 		},
 		deleteExpense: async (_: {}, args: MutationDeleteExpenseArgs, __: any) => {

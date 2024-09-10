@@ -2,6 +2,7 @@ const typeDefs = `#graphql
 
 
 scalar Buffer
+scalar Date
 
 # AWS S3 Types
 
@@ -90,7 +91,7 @@ input RemoveUserInput {
 
 type Expense {
 	_id: ID!
-	date: String!
+	date: Date!
 	amount: Float!
 	payee: String!
 	category: String!
@@ -107,7 +108,7 @@ input CreateExpenseInput {
 
 input UpdateExpenseDateInput {
 	expenseId: ID!
-	date: String!
+	date: Date!
 }
 
 input UpdateExpenseAmountInput {
@@ -602,8 +603,8 @@ type Query {
 	queryThumbtackReviews: [ThumbtackReview!]
 
 	# Annual Book Keeping Queries
-	GetAnnualExpenseCsv: Buffer!
-	GetAnnualIncomeCsv: Buffer!
+	GetAnnualExpenseCsv: String!
+	GetAnnualIncomeCsv: String!
 
 }
 
