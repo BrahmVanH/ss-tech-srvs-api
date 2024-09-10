@@ -603,8 +603,8 @@ type Query {
 	queryThumbtackReviews: [ThumbtackReview!]
 
 	# Annual Book Keeping Queries
-	GetAnnualExpenseCsv: String!
-	GetAnnualIncomeCsv: String!
+	getAnnualExpenseCsv: String!
+	getAnnualIncomeCsv: String!
 
 }
 

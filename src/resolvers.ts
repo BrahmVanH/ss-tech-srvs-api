@@ -66,7 +66,7 @@ import { Types } from 'mongoose';
 import { emailInvoiceToCustomer, sendScheduleServiceEmail } from './lib/nodemailer';
 import createInvoicePdf from './lib/pdfkit';
 import * as csvHandler from './lib/csvHandler';
-import { IAnnualExpenseData } from './types';
+import { IAnnualExpenseData, IAnnualIncomeData } from './types';
 
 // TO_DO: create resolver to create s3 folder for property as soon as property is created
 // TO_DO: create resolvers flow to create, update, delete user pin
@@ -360,7 +360,7 @@ const resolvers: Resolvers = {
 				throw new Error('Error in finding reviews: ' + err.message);
 			}
 		},
-		GetAnnualExpenseCsv: async () => {
+		getAnnualExpenseCsv: async () => {
 			try {
 				await connectToDb();
 
@@ -386,7 +386,44 @@ const resolvers: Resolvers = {
 				}
 
 				return csvString;
+			} catch (err: any) {
+				console.error({ message: 'error in finding expenses', details: err });
+				throw new Error('Error in finding expenses: ' + err.message);
+			}
+		},
+		getAnnualIncomeCsv: async () => {
+			try {
+				await connectToDb();
 
+				const invoices = await Invoice.find({ paid: true }).populate('customerId');
+
+				if (!invoices) {
+					throw new Error('Error fetching all invoices from database');
+				}
+
+				const annualIncomeData: IAnnualIncomeData[] = invoices.map((invoice) => {
+					if (!invoice.paid) {
+						return {
+							date: '',
+							amount: 0,
+							account: '',
+							customer: '',
+						};
+					}
+					return {
+						date: invoice.date ?? '',
+						amount: invoice.total ?? 0,
+						account: 'handy man service',
+						customer: invoice.customerId.firstName + ' ' + invoice.customerId.lastName,
+					};
+				});
+				const csvString = await csvHandler.exportIncomeToCsv(annualIncomeData);
+
+				if (!csvString) {
+					throw new Error('Error creating CSV buffer');
+				}
+
+				return csvString;
 			} catch (err: any) {
 				console.error({ message: 'error in finding expenses', details: err });
 				throw new Error('Error in finding expenses: ' + err.message);

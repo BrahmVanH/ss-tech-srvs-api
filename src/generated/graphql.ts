@@ -596,9 +596,9 @@ export type Property = {
 
 export type Query = {
   __typename?: 'Query';
-  GetAnnualExpenseCsv: Scalars['String']['output'];
-  GetAnnualIncomeCsv: Scalars['String']['output'];
   getAllUsers?: Maybe<Array<User>>;
+  getAnnualExpenseCsv: Scalars['String']['output'];
+  getAnnualIncomeCsv: Scalars['String']['output'];
   getPresignedS3Url: Scalars['String']['output'];
   queryCustomerById: Customer;
   queryCustomers?: Maybe<Array<Customer>>;
@@ -1475,9 +1475,9 @@ export type PropertyResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  GetAnnualExpenseCsv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  GetAnnualIncomeCsv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   getAllUsers?: Resolver<Maybe<Array<ResolversTypes['User']>>, ParentType, ContextType>;
+  getAnnualExpenseCsv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  getAnnualIncomeCsv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   getPresignedS3Url?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPresignedS3UrlArgs, 'altTag' | 'commandType' | 'imgKey'>>;
   queryCustomerById?: Resolver<ResolversTypes['Customer'], ParentType, ContextType, RequireFields<QueryQueryCustomerByIdArgs, 'customerId'>>;
   queryCustomers?: Resolver<Maybe<Array<ResolversTypes['Customer']>>, ParentType, ContextType>;
