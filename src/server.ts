@@ -19,6 +19,7 @@ schema = constraintDirective()(schema);
 const server = new ApolloServer<BaseContext>({
 	schema,
 	introspection: true,
+	allowBatchedHttpRequests: true,
 });
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];

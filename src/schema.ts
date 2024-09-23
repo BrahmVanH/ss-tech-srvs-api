@@ -138,20 +138,20 @@ input DeleteExpenseInput {
 # Customer & CRUD Types
 
 
-type Customer {
-	_id: ID!
-	createdAt: String
-	updatedAt: String
-	firstName: String!
-	lastName: String!
-	address: Address!
-	email: String!
-	phone: String!
-	businessName: String!
-	workOrders: [WorkOrder]!
-	invoices: [Invoice]!
-	properties: [Property]!
-}
+		type Customer {
+			_id: ID!
+			createdAt: String
+			updatedAt: String
+			firstName: String!
+			lastName: String!
+			address: Address!
+			email: String!
+			phone: String!
+			businessName: String!
+			workOrders: [WorkOrder]!
+			invoices: [Invoice]!
+			properties: [Property]!
+		}
 
 
 
@@ -443,8 +443,8 @@ input CreateWorkOrderInput {
 	completedBy: String
 	quote: Float
 	total: Float
-	charged: Boolean!
-	paid: Boolean!
+	charged: Boolean
+	paid: Boolean
 	comments: String
 	laborItems: [LaborItemInput]
 }

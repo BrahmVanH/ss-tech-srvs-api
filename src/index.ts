@@ -27,6 +27,7 @@ schema = constraintDirective()(schema);
 const server = new ApolloDServerDev<BaseContext>({
 	schema,
 	introspection: true,
+	allowBatchedHttpRequests: true,
 	plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 
@@ -39,6 +40,8 @@ const startApolloServer = async () => {
 		app.use((req, res, next) => {
 			if (!allowedOrigins.includes(req.headers.origin ?? '')) {
 				console.log('Origin not allowed:', req.headers.origin);
+			} else {
+				console.log('server hit from: ', req.headers.origin);
 			}
 			next();
 		});

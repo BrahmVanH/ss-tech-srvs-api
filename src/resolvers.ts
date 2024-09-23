@@ -281,6 +281,7 @@ const resolvers: Resolvers = {
 				if (!invoices) {
 					throw new Error('Error fetching all invoices from database');
 				}
+				console.log(invoices);
 
 				return invoices;
 			} catch (err: any) {
@@ -1091,12 +1092,15 @@ const resolvers: Resolvers = {
 					...workOrder,
 					lastUpdated: new Date(),
 					completed: false,
-					completedBy: workOrder.completedBy ?? '',
+					completedBy: workOrder.completedBy ?? 'brahm',
 					quote: workOrder.quote ?? 0,
 					total: workOrder.total ?? 0,
-					comments: workOrder.comments ?? '',
+					comments: workOrder.comments ?? ' ',
+					paid: false,
+					charged: false,
 					invoices: [],
 				});
+
 
 				if (!newWorkOrder) {
 					throw new Error('Could not create work order');
